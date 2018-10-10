@@ -2,7 +2,6 @@ package risk.gui;
 
 
 import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
 
 public class App {
 

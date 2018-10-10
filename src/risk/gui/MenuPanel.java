@@ -1,25 +1,23 @@
 package risk.gui;
 
-import java.awt.CardLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-public class MenuPanel extends JPanel {
+import risk.gui.map_editor.MapEditorPanel;
 
+public class MenuPanel extends JPanel {
+	public static final int WIDTH = 400;
+	public static final int HEIGHT = 600;
+	
 	private static MenuPanel menuPanel;
 	
 	JButton button2;
 	private MenuPanel() {
-		this.setLayout(null );
+		this.setLayout(null);
 		//GridBagConstraints c = new GridBagConstraints();
-		
 
 		JButton button1 = new JButton("Play");
 		button1.setToolTipText("This is a button");
@@ -29,12 +27,11 @@ public class MenuPanel extends JPanel {
 
 
 		button2 = new JButton("MapEditor");
-		ListenForButton lForButton = new ListenForButton();
-		button2.addActionListener(lForButton);
+		button2.addActionListener(new ListenForButton());
 		button2.setBounds(175,300,150,60);
 		this.add(button2);
 		
-		
+
 	}
 	
 	
@@ -51,9 +48,9 @@ public class MenuPanel extends JPanel {
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == button2) {
 				MainFrame frame = MainFrame.getInstance();
-				frame.SetCurrentPanel(MainFrame.MAPEDITORPANEL);
+				frame.setCurrentPanel(MainFrame.MAP_EDITOR_PANEL);
 
-				frame.SetSize(800, 800);
+				frame.SetSize(MapEditorPanel.WIDTH, MapEditorPanel.HEIGHT);
 			}
 			
 		}

@@ -1,59 +1,66 @@
 package risk.gui;
 
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-public class MainFrame extends JFrame {
+import risk.gui.map_editor.MapEditorPanel;
 
+
+public class MainFrame extends JFrame {
+	
+	public static final String MENU_PANEL = "MenuPanel";
+	public static final String MAP_EDITOR_PANEL = "MapEditorPanel";
+	
 	private static MainFrame mainFrame;
 	private JPanel panelManager;
 	private MenuPanel menuPanel;
 	private MapEditorPanel mapEditorPanel;
-	
-	
-	public static final String MENUPANEL = "MenuPanel";
-	public static final String MAPEDITORPANEL = "MapEditorPanel";
+		
+
 	
 	private MainFrame() {
-		InitFrame();
+		initFrame();
 	}
 	
-	private void InitFrame() {
-		this.SetSize(500, 600);
-		this.setResizable(false);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setTitle("Risk");
+	private void initFrame() {
+		SetSize(MenuPanel.WIDTH, MenuPanel.HEIGHT);
+		setResizable(false);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setTitle("Risk");
+
+		getContentPane().setBackground(Color.BLACK);
 		this.setVisible(true);
 		
 		panelManager = new JPanel(new CardLayout());
 		
 		
 		menuPanel = MenuPanel.getInstance();
-		mapEditorPanel = new MapEditorPanel();
-		panelManager.add(menuPanel, MENUPANEL);
-		panelManager.add(mapEditorPanel, MAPEDITORPANEL);
-		
-		this.add(panelManager);
+		mapEditorPanel = MapEditorPanel.getInstance();
+		panelManager.add(menuPanel, MENU_PANEL);
 
+		setCurrentPanel(MENU_PANEL);	
+		add(panelManager);
+		panelManager.add(mapEditorPanel, MAP_EDITOR_PANEL);
 
 	}
 	
 	public void SetSize(int x, int y) {
-		this.setSize(x, y);
+		setSize(x, y);
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		Dimension dim = tk.getScreenSize();
 	
 		int xPos = (dim.width / 2) - (this.getWidth() / 2);
 		int yPos = (dim.height / 2) - (this.getHeight() / 2);
 		
-		this.setLocation(xPos, yPos);
+		setLocation(xPos, yPos);
 	}
 	
-	public void SetCurrentPanel(String panelName) {
+	public void setCurrentPanel(String panelName) {
 		CardLayout c = (CardLayout)(panelManager.getLayout());
 		c.show(panelManager, panelName);
 
