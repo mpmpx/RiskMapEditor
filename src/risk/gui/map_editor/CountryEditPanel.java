@@ -6,9 +6,14 @@ import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
+import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -18,68 +23,62 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.text.JTextComponent;
 
 import risk.contorller.MapEditorController;
+import risk.game.*;
 import risk.gui.component.CountryComponent;
 
 
 public class CountryEditPanel extends JPanel {
-	private static final int HEIGHT = 500;
-	private static final int WIDTH = 200;
-	private static final int NAME_FIELD_HEIGHT = 60;
-	private static final int CONTINENT_FIELD_HEIGHT = 60;
-	private static final int LINKS_FIELD_HEIGHT = 400;
-	private static final int SPACE_HEIGHT = 10;
-	
-	private static CountryEditPanel countryEditPanel;
-	private MapEditorPanel rootPanel;
+	public static final int HEIGHT = 500;
+	public static final int WIDTH = 200;
+	public static final int NAME_FIELD_HEIGHT = 60;
+	public static final int CONTINENT_FIELD_HEIGHT = 60;
+	public static final int LINKS_FIELD_HEIGHT = 400;
+	public static final int SPACE_HEIGHT = 10;
+
 	
 	private JPanel nameFieldPanel;
 	private JPanel continentPanel;
 	private JPanel linksPanel;
 	private JButton addContinentBtn;
 	private JButton deleteCountryBtn;
-	private ArrayList<String> adjacentCountryList;
 	private JComboBox<String> continentComboBox;
-	private static MapEditorController controller;
-	private HashMap<Point, CountryComponent> countryComponentHashMap;
+	private MapEditorController controller;
+	private HashMap<Point, Country> countryHashMap;
+	private HashMap<Point, LinkedList<Point>> edgeHashMap;
+	private Country selectedCountry;
+	private LinkedList<Continent> continentList;
 	
-	public CountryEditPanel() {
+	
+	public CountryEditPanel(MapEditorController controller) {
 		this.setOpaque(true);
 		this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
 		this.setBorder(BorderFactory.createTitledBorder("Selected Territory"));
 		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		
-		rootPanel = (MapEditorPanel) this.getParent();
 		this.createNameFieldPanel();
 		this.createContinentFieldPanel();
 		this.createLinksPanel();
 		this.createDeleteCountryBtn();
-		controller = MapEditorPanel.getController();
-		adjacentCountryList = new ArrayList<String>(10);
+		this.controller = controller;
 		
+		this.selectedCountry = null;
+		this.continentList = new LinkedList<Continent>();
 		
-		/*for (int i = 0; i < 10; i ++) {
-			this.addLink("i: " + i);
-			adjacentCountryList.add("i: " + i);
-		}*/
-	}
-	
-	public static CountryEditPanel getInstance(){
-		if (countryEditPanel == null) {
-			countryEditPanel = new CountryEditPanel();
-		}
-		
-		return countryEditPanel;
+
 	}
 	
 	private void createNameFieldPanel() {
-		this.add(Box.createRigidArea(new Dimension(WIDTH, SPACE_HEIGHT)));
-		
+		this.add(Box.createRigidArea(new Dimension(WIDTH, SPACE_HEIGHT)));	
 		nameFieldPanel = new JPanel();
 		nameFieldPanel.setMaximumSize(new Dimension(WIDTH, NAME_FIELD_HEIGHT));
 		nameFieldPanel.setBorder(BorderFactory.createTitledBorder("Name"));
 		JTextField nameField = new JTextField(15);
+		if (this.selectedCountry != null) {
+			nameField.setText(this.selectedCountry.getName());
+		}
 		nameFieldPanel.add(nameField);
 		this.add(nameFieldPanel);		
 	}
@@ -91,6 +90,7 @@ public class CountryEditPanel extends JPanel {
 		continentPanel.setMaximumSize(new Dimension(WIDTH, CONTINENT_FIELD_HEIGHT));
 		continentPanel.setBorder(BorderFactory.createTitledBorder("Continent"));
 		continentComboBox = new JComboBox<>();
+		continentComboBox.addItemListener(new ListenForComboBox());
 		continentComboBox.setPreferredSize(new Dimension(130,20));
 		continentPanel.add(continentComboBox);
 		
@@ -118,7 +118,65 @@ public class CountryEditPanel extends JPanel {
 		deleteCountryBtn.addActionListener(new ListenForButton());
 		this.add(deleteCountryBtn);
 	}
+	
+	public void clear() {
+		((JTextField) nameFieldPanel.getComponent(0)).setText("");
+		continentComboBox.removeAllItems();
+		linksPanel.removeAll();
+		this.revalidate();
+	}
+	
+	public void updateInfo() {
+		Component[] components = nameFieldPanel.getComponents();
+		//this.selectedCountry = controller.getSelectedCountry();
+		if (this.selectedCountry != null) {
+			this.selectedCountry.setName(((JTextField)components[0]).getText());
+			this.selectedCountry.setContinentName((String)continentComboBox.getSelectedItem());
+			controller.updateCountryInfo(this.selectedCountry);
+		}
+		this.selectedCountry = controller.getSelectedCountry();
+		this.continentList = controller.getContinentList();
 		
+		((JTextField) components[0]).setText(this.selectedCountry.getName());
+		this.updateContinentPanel();
+		this.updateLinkPanel();
+	}
+	
+	private void updateContinentPanel() {
+		continentComboBox.getItemCount();
+		LinkedList<String> comboBoxContent = new LinkedList<String>();
+		for (int i = 0; i < continentComboBox.getItemCount(); i++) {
+			comboBoxContent.add(continentComboBox.getItemAt(i));
+		}
+		for (Continent continent : continentList) {
+			if (!comboBoxContent.contains(continent.getName())) {
+				continentComboBox.addItem(continent.getName());
+			}
+		}
+		
+		continentComboBox.setSelectedItem(this.selectedCountry.getContinentName());
+		continentPanel.revalidate();
+		continentPanel.repaint();
+	}	
+	
+	private void updateLinkPanel() {
+		this.linksPanel.removeAll();
+		selectedCountry = controller.getSelectedCountry();
+		edgeHashMap = controller.getEdgeHashMap();
+		countryHashMap = controller.getCountryHashMap();
+		if (!edgeHashMap.isEmpty() && selectedCountry != null) {
+			LinkedList<Point> pointList = edgeHashMap.get(selectedCountry.getLocation());
+			if (pointList != null) {
+				for (Point location : pointList) {
+					addLink(countryHashMap.get(location).getName());
+				}
+			}
+		}
+		
+		this.linksPanel.revalidate();
+		this.linksPanel.repaint();
+	}
+	
 	/* methods related to continentPanel */
 	
 	private void addContinent() {
@@ -165,23 +223,13 @@ public class CountryEditPanel extends JPanel {
 			}
 			
 			controller.addContinent(newContinentName, newContinentValue);
-			updateContinentPanel();
+			this.continentComboBox.addItem(newContinentName);
+			//updateContinentPanel();
 			break;
 		}		
 	}
 
-	private void updateContinentPanel() {
-		ArrayList<String> continentList = controller.getContinentList();
-		
-		continentComboBox.removeAllItems();
-		for (String continentName : continentList) {
-			System.out.println(continentName);
-			continentComboBox.addItem(continentName);
-		}
-		
-		continentPanel.revalidate();
-		continentPanel.repaint();
-	}
+
 	/* methods related to linksPanel */
 	
 	private void addLink(String newCountryName) {
@@ -206,28 +254,42 @@ public class CountryEditPanel extends JPanel {
 		JPanel linkContent = (JPanel) selectedBtn.getParent();
 		String targetCountry = ((JLabel) linkContent.getComponent(1)).getText();
 		linksPanel.remove(selectedBtn.getParent());
-		adjacentCountryList.remove(targetCountry);
 		
 		linksPanel.revalidate();
 		linksPanel.repaint();		
 	}	
 
 
-
 	private class ListenForButton implements ActionListener {
 		
 		@Override
-		public void actionPerformed(ActionEvent event) {
-			JButton selectedBtn = (JButton) event.getSource();
+		public void actionPerformed(ActionEvent e) {
+			JButton selectedBtn = (JButton) e.getSource();
 			if (selectedBtn == addContinentBtn) {
 				addContinent();
 			}
 			else if (selectedBtn == deleteCountryBtn){
-				controller.deleteCountry();
+				controller.deleteCountry(controller.getSelectedCountry());
 			}
 			else {
-				removeLink(selectedBtn);
+				JLabel label = (JLabel) selectedBtn.getParent().getComponent(1);
+				controller.removeLink(label.getText());
 			}
 		}
 	}
+
+	private class ListenForComboBox implements ItemListener {
+
+		@Override
+		public void itemStateChanged(ItemEvent e) {
+			
+			if (e.getStateChange() == ItemEvent.SELECTED) {
+				String continentName = (String)e.getItem();
+				selectedCountry = controller.getSelectedCountry();
+				selectedCountry.setContinentName(continentName);
+				controller.updateCountryInfo(selectedCountry);
+		    }
+		}
+	}
+	
 }

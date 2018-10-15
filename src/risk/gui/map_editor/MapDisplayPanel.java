@@ -1,76 +1,87 @@
 package risk.gui.map_editor;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.HashMap;
+import java.util.LinkedList;
 
+import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.MouseInputListener;
 
 import risk.contorller.MapEditorController;
+import risk.game.Country;
 import risk.gui.component.CountryComponent;
 
 class MapDisplayPanel extends JPanel implements MouseInputListener {
 
-	private static MapDisplayPanel mapDisplayPanel;	
+	public static final int WIDTH = 900;
+	public static final int HEIGHT = 700;
+	
+	private int startX = 0;
+	private int startY = 0;
+	private int destX = 0;
+	private int destY = 0;
+	
 	private JScrollPane scrollPane;
-	private static final int WIDTH = 900;
-	private static final int HEIGHT = 700;
-	private static MapEditorController controller;	
-
-	
-	
+	private MapEditorController controller;	
 	private Point cursorLocation;
-
+	private HashMap<Point, Country> countryHashMap;
+	private HashMap<String, Color> continentColorHashMap;
+	private HashMap<Point, LinkedList<Point>> edgeList;
 	
-	private MapDisplayPanel() {
+	public MapDisplayPanel(MapEditorController controller) {
 		this.setLayout(null);
 		this.setOpaque(true);
 		this.setBackground(Color.WHITE);
-		this.setPreferredSize(new Dimension(2000,2000));	
-		controller = MapEditorPanel.getController();
-		cursorLocation = new Point(0,0);
-		HashMap<Point, CountryComponent> countryComponentHashMap = controller.getCountryComponentHashMap();
+		this.setPreferredSize(new Dimension(WIDTH, HEIGHT));	
+		this.controller = controller;
+		this.cursorLocation = new Point(0,0);
+		this.countryHashMap = controller.getCountryHashMap();
+		this.continentColorHashMap = controller.getContinentColorHashMap();
+		this.edgeList = controller.getEdgeHashMap();
+		
 		
 		this.addMouseListener(this);
 		this.addMouseMotionListener(this);
 		
-		if (!countryComponentHashMap.isEmpty()) {
-			for (CountryComponent countryComponent : countryComponentHashMap.values()) {
-				add(countryComponent);
-			}
-		}
+		scrollPane = new JScrollPane(this);
+		scrollPane.setPreferredSize(new Dimension(WIDTH, HEIGHT));	
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        
+		
 	}
 	
-	public static MapDisplayPanel getInstance(){
-		if (mapDisplayPanel == null) {
-			mapDisplayPanel = new MapDisplayPanel();
-		}
-		return mapDisplayPanel;
-	}
 	
 	public JScrollPane getScrollPane(){
-		if (mapDisplayPanel == null) {
-			mapDisplayPanel = new MapDisplayPanel();
-		}
-		
-		scrollPane = new JScrollPane(mapDisplayPanel);
-		scrollPane.setPreferredSize(new Dimension(WIDTH, HEIGHT));	
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        
+
 		return scrollPane;
 	}
 
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
+		edgeList = controller.getEdgeHashMap();		
+		
+		for (Point startLocation : edgeList.keySet()) {
+			for (Point destLocation : edgeList.get(startLocation)) {
+				g.drawLine(startLocation.x, startLocation.y, 
+							destLocation.x, destLocation.y);
+			}
+		}
+		
+		// Draw a temporary line on the screen
+		g.drawLine(startX, startY, destX, destY);
+		
 		if (controller.getAddCountryFlag() == true && this.isEnabled() == true) {
 			g.drawOval(cursorLocation.x - CountryComponent.Radius, 
 					cursorLocation.y - CountryComponent.Radius, 
@@ -78,62 +89,96 @@ class MapDisplayPanel extends JPanel implements MouseInputListener {
 		}
 	}
 	
-	public void addButton() {
+	public void clear() {
+		this.removeAll();
+		this.repaint();
+	}
+	
+	public void updateInfo() {
+		countryHashMap = controller.getCountryHashMap();
+		continentColorHashMap = controller.getContinentColorHashMap();
+		edgeList = controller.getEdgeHashMap();
 		
+		Component[] buttons = this.getComponents();
+		for (Component btn : buttons) {
+			if (btn instanceof CountryComponent) {
+				Country country = countryHashMap.get(((CountryComponent)btn).getCenterLocation());
+				Color continentColor = continentColorHashMap.get(country.getContinentName());
+				if (country.getContinentName() != null) {
+					((CountryComponent)btn).setForeground(continentColor);					
+					((CountryComponent)btn).setBackground(continentColor);
+				}
+				btn.revalidate();
+				btn.repaint();
+			}
+		}		
+		this.repaint();
+	}
+	
+	public void unSelectCountry() {
+		Component[] buttons = this.getComponents();
+		for (Component btn : buttons) {
+			if (btn instanceof CountryComponent) {
+				((CountryComponent)btn).setSelected(false);
+			}
+		}
 	}
 
-
+	
+	public void removeCountry(Point location) {
+		Component[] buttons = this.getComponents();
+		for (Component btn : buttons) {
+			if (btn instanceof CountryComponent) {
+				if (((CountryComponent)btn).getCenterLocation().equals(location)){
+					this.remove(btn);
+				}
+			}
+		}
+		this.revalidate();
+		this.repaint();
+	}
 	
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		
-		HashMap<Point, CountryComponent> countryComponentHashMap = controller.getCountryComponentHashMap();
+		countryHashMap = controller.getCountryHashMap();
 		
 		if (this.isEnabled() == true) {
 			if (controller.getAddCountryFlag() == true) {
-				for (Point point : countryComponentHashMap.keySet()) {
-					if ((int)Math.hypot(point.getX() - e.getX(), point.getY()- e.getY()) < CountryComponent.Radius * 2){
-						JOptionPane.showMessageDialog(null, "You cannot place a country here");
-						return;
+				if (countryHashMap.size() > 0) {
+					for (Point point : countryHashMap.keySet()) {
+						if (Math.hypot(point.getX() - e.getX(), point.getY()- e.getY()) < CountryComponent.Radius * 2){
+							JOptionPane.showMessageDialog(null, "You cannot place a country here");
+							return;
+						}
 					}
 				}
-			
+				
 				CountryComponent countryComponent = new CountryComponent();
 				countryComponent.addActionListener(new countryActionListener());
+				countryComponent.addMouseListener(new countryMouseListener());
 				countryComponent.setBackground(new Color(123,123,123));
 				countryComponent.setForeground(new Color(123,123,123));
 				countryComponent.setLocationAtPoint(e.getPoint());
+			
+				System.out.println("addcountry: " + countryComponent.getCenterLocation().x + ", " + countryComponent.getCenterLocation().y);
+				
 				this.add(countryComponent);
 				controller.addCountry(countryComponent);
-			
-				this.revalidate();
 				this.repaint();
+				this.revalidate();
 			}
-		
-		
-		
 
-
-			for (CountryComponent countryComponent : countryComponentHashMap.values()) {
-				Point location = countryComponent.getLocation();
-				System.out.println(location.x+", "+location.y);
-				//		if (countryComponent.contains(e.getPoint())){
-		//			((MapEditorPanel)this.getParent().getParent().getParent()).enableEditPanel();
-		//		}
-			}
 		}
 	}
 
 	@Override
 	public void mouseEntered(MouseEvent arg0) {
-		System.out.println("mouse entered display panel");
 		
 	}
 
 	@Override
 	public void mouseExited(MouseEvent arg0) {
 		// TODO Auto-generated method stub
-		System.out.println("mouse left display panel");
 	}
 
 	@Override
@@ -142,43 +187,116 @@ class MapDisplayPanel extends JPanel implements MouseInputListener {
 	}
 
 	@Override
-	public void mouseReleased(MouseEvent e) {
+	public void mouseReleased(MouseEvent e) {	
+		//System.out.println("display panel: released");
+		//System.out.println("display panel release at " + e.getX() + ", " + e.getY());
+		
+		if (this.isEnabled() == true) {
+			if (controller.getAddCountryFlag() == false) {
+				Component[] allComponents = this.getComponents();
+				for (Component component : allComponents) {
+					if (component instanceof CountryComponent) {
+						CountryComponent button = (CountryComponent)component;
+						if (Math.hypot(button.getCenterLocation().x - e.getX(),
+								button.getCenterLocation().y - e.getY()) < CountryComponent.Radius) {
+							destX = button.getCenterLocation().x;
+							destY = button.getCenterLocation().y;				
 
+							if (startX != destX && startY != destY) {
+								controller.addLink(new Point(startX, startY), new Point(destX, destY));
+							}
+							startX = 0;
+							startY = 0;
+							destX = 0;
+							destY = 0;
+							this.repaint();
+							return;
+						}
+					}
+				}
+			}
+		}
+		startX = 0;
+		startY = 0;
+		destX = 0;
+		destY = 0;
+		this.repaint();
 	}
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		// TODO Auto-generated method stub
-
+		countryHashMap = controller.getCountryHashMap();
+		if (this.isEnabled() == true && controller.getAddCountryFlag() == false) {
+			if (countryHashMap.containsValue(controller.getSelectedCountry())) {
+				this.startX = controller.getSelectedCountry().getX();
+				this.startY = controller.getSelectedCountry().getY();
+				
+				//System.out.println(this.startX + ", " + this.startY);
+				this.destX = e.getX();
+				this.destY = e.getY();
+				this.repaint();
+			}
+		}
 	}
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		// TODO Auto-generated method stub
+		/* TODO Auto-generated method stub
+			System.out.println(e.getX() + ", " + e.getY());
+		*/
+		
 		if (controller.getAddCountryFlag() == true) {
 			cursorLocation.setLocation(e.getPoint());
 			repaint();
 		}
 	}
 	
+
+	
 	private class countryActionListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent event) {
-			 CountryComponent countryComponent = (CountryComponent) event.getSource();
-		//	 countryComponent.setForeground(Color.black);
-			 countryComponent.setSelected(true);
-			 controller.setSelectedCountry(countryComponent);
-			 MapEditorPanel rootPanel = (MapEditorPanel) mapDisplayPanel.getParent().getParent().getParent();//countryComponent.getParent().getParent().getParent().getParent();
-			 
-			 System.out.println(rootPanel.getClass().getName());
-			 
-			 rootPanel.updateAll();
+			unSelectCountry();
+			CountryComponent selectedCountryComponent = (CountryComponent) event.getSource();
+			selectedCountryComponent.setSelected(true);
+			controller.setSelectedCountry(selectedCountryComponent.getCenterLocation());
+		}
+	}
+	
+	private class countryMouseListener implements MouseListener {
+
+		@Override
+		public void mouseClicked(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+			
 		}
 
-		private MapEditorPanel getParent() {
-			// TODO Auto-generated method stub
-			return null;
+		@Override
+		public void mouseEntered(MouseEvent e) {
+			//System.out.println("entered");
+			
 		}
+
+		@Override
+		public void mouseExited(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mousePressed(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			// TODO Auto-generated method stub
+			//System.out.println("release");
+			//System.out.println("button release at " + e.getX() + ", " + e.getY());
+			
+		}
+		
 	}
 	
 }

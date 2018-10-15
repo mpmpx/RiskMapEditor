@@ -1,6 +1,7 @@
 package risk.gui.map_editor;
 
 import risk.contorller.*;
+import risk.game.Country;
 import risk.gui.MainFrame;
 import risk.gui.MenuPanel;
 import risk.gui.component.CountryComponent;
@@ -43,18 +44,18 @@ public class MapEditorPanel extends JPanel {
 	public static final int HEIGHT = 800;
 	public static final int WIDTH = 1200;
 	
-	private static MapEditorPanel mapEditorPanel;
 	private MapDisplayPanel mapDisplayPanel;
 	private CountryEditPanel countryEditPanel;
 	private EditorMenuPanel editorMenuPanel; 
 	
-	private static MapEditorController controller;
+	private MapEditorController controller;
 	
-	private MapEditorPanel() {	
+	public MapEditorPanel() {	
 	    this.setLayout(new GridBagLayout());
 	    GridBagConstraints c = new GridBagConstraints();
-		
-	    countryEditPanel = CountryEditPanel.getInstance();
+	    controller = new MapEditorController(this);
+	    
+	    countryEditPanel = new CountryEditPanel(controller);
 	    c.weightx = 0.1;
 	    c.gridx = 0;
 	    c.gridy = 0;
@@ -62,36 +63,34 @@ public class MapEditorPanel extends JPanel {
 	    enableAllComponent(countryEditPanel, false);
 	    this.add(countryEditPanel, c);
 	    
-	    mapDisplayPanel = MapDisplayPanel.getInstance();	
+	    mapDisplayPanel = new MapDisplayPanel(controller);	
 	    c.weightx = 0.1;
 	    c.gridheight = 2;
 	    c.gridx = 1;
 	    c.gridy = 0;
-	    enableAllComponent(mapDisplayPanel, false);
+	    enableAllComponent(mapDisplayPanel.getScrollPane(), false);
 	    this.add(mapDisplayPanel.getScrollPane(), c);
 	    
-		editorMenuPanel = EditorMenuPanel.getInstance();
+		editorMenuPanel = new EditorMenuPanel(controller);
 		c.gridx = 0;
 	    c.gridy = 1;
 	    c.anchor = GridBagConstraints.PAGE_END;
 	    this.add(editorMenuPanel, c);
-	    
-	    controller = MapEditorController.getInstance();
-	}
+	}	
 	
-	public static MapEditorPanel getInstance() {
-		if (mapEditorPanel == null) {
-			mapEditorPanel = new MapEditorPanel();
+	public void setMapSize(int width, int height) {
+		this.mapDisplayPanel.setPreferredSize(new Dimension(width, height));
+		this.mapDisplayPanel.revalidate();
+		if (width < MapDisplayPanel.WIDTH) {
+			this.mapDisplayPanel.getScrollPane().setPreferredSize(new Dimension(width, MapDisplayPanel.HEIGHT));
+		} 
+		else if (height < MapDisplayPanel.HEIGHT){
+			this.mapDisplayPanel.getScrollPane().setPreferredSize(new Dimension(MapDisplayPanel.WIDTH, height));
 		}
-		return mapEditorPanel;
-	}
-
-	public static MapEditorController getController() {
-		if (controller == null) {
-			controller = MapEditorController.getInstance();
+		else {
+			this.mapDisplayPanel.getScrollPane().setPreferredSize(new Dimension( MapDisplayPanel.WIDTH, MapDisplayPanel.HEIGHT));
 		}
-		
-		return controller;
+		this.mapDisplayPanel.getScrollPane().revalidate();
 	}
 	
 	private void enableAllComponent(Container container, boolean enable) {
@@ -105,22 +104,36 @@ public class MapEditorPanel extends JPanel {
 		container.setEnabled(enable);
 	}
 	
-	public void enableMapDisplayPanel() {
-		enableAllComponent(mapDisplayPanel, true);
+	public void enableMapDisplayPanel(boolean enable) {
+		enableAllComponent(mapDisplayPanel.getScrollPane(), enable);
 	}
 	
-	public void enableCountryEditPanel() {
-		enableAllComponent(countryEditPanel, true);
-		countryEditPanel.revalidate();
+	public void enableCountryEditPanel(boolean enable) {
+		enableAllComponent(countryEditPanel, enable);
 	}
 	
-	public void enableAllComponent() {
-		enableAllComponent(countryEditPanel, true);
-		enableAllComponent(mapDisplayPanel, true);
+	
+	public void updateEditPanel() {
+		countryEditPanel.updateInfo();
 	}
 	
-	public void updateAll() {
-		enableCountryEditPanel();
+	public void updateMapDisplay() {
+		mapDisplayPanel.repaint();
+		mapDisplayPanel.updateInfo();
+		
+	}
+	
+	public void removeCountry(Point location) {
+		mapDisplayPanel.removeCountry(location);
+	}
+	
+	public void clear() {
+		mapDisplayPanel.clear();
+		countryEditPanel.clear();
+	}
+	
+	public void clearEditPanel() {
+		countryEditPanel.clear();
 	}
 }
 

@@ -15,6 +15,7 @@ import java.awt.event.MouseListener;
 import java.awt.geom.Ellipse2D;
 
 import javax.swing.JButton;
+import javax.swing.SwingConstants;
 import javax.swing.event.MouseInputListener;
 
 
@@ -57,10 +58,7 @@ public class CountryComponent extends JButton{
 		Graphics2D g2D = (Graphics2D) g;
 		borderColor = getForeground();
 		
-		if (getModel().isSelected()){
-			g2D.setColor(Color.black);
-		} 
-		else if (getModel().isRollover()) {
+		if (getModel().isRollover() || getModel().isSelected()) {
 			g2D.setColor(Color.black);
 		}
 		else {
@@ -75,8 +73,6 @@ public class CountryComponent extends JButton{
 		this.componentLocation.setLocation(location.x - Radius, location.y - Radius);
 		
 		this.setLocation(this.componentLocation);
-		
-		//this.setLocation(new Point(location.x - Radius, location.y - Radius));		
 	}
 	// Hit detection.
 

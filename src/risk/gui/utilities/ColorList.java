@@ -34,6 +34,14 @@ public class ColorList {
 	}
 	
 	public static Color get() {
+		if (stack == null) {
+			stack = new Stack<Color>();
+			
+			for (int i = COLOR_LIST.length - 1; i >= 0; i--) {
+				stack.push(COLOR_LIST[i]);
+			}		
+		}
+				
 		return stack.pop();
 	}
 	

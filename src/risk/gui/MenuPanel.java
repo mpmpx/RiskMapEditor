@@ -30,8 +30,6 @@ public class MenuPanel extends JPanel {
 		button2.addActionListener(new ListenForButton());
 		button2.setBounds(175,300,150,60);
 		this.add(button2);
-		
-
 	}
 	
 	

@@ -40,7 +40,7 @@ public class MainFrame extends JFrame {
 		
 		
 		menuPanel = MenuPanel.getInstance();
-		mapEditorPanel = MapEditorPanel.getInstance();
+		mapEditorPanel = new MapEditorPanel();
 		panelManager.add(menuPanel, MENU_PANEL);
 
 		setCurrentPanel(MENU_PANEL);	
