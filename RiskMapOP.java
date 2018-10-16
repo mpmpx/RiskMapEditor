@@ -273,6 +273,7 @@ public class RiskMapOP {
 
             bufw.write("[Territories]" + "\n");
             List<Country> territories = map.getTerritories();
+            LinkedList<String> str = new LinkedList<String>();
             for (int i = 0; i < territories.size(); i++) {
                 Country country = territories.get(i);
                 List<Country> AdjacentCountry = country.getAdjacentCountry();
@@ -280,15 +281,24 @@ public class RiskMapOP {
                 for (int j = 0; j < AdjacentCountry.size(); j++) {
                     strAdjacentCountry += "," + AdjacentCountry.get(j).getName();
                 }
-                String str = country.getName() + "," + country.getCoordinator().getX() + "," + country.getCoordinator().getY() + ","
-                        + country.getContinent().getName() + strAdjacentCountry;
-
-                bufw.write(str);
-                bufw.write("\n");
+                str.add(country.getName() + "," + country.getCoordinator().getX() + "," + country.getCoordinator().getY() + ","
+                        + country.getContinent().getName() + strAdjacentCountry);
             }
 
-            bufw.flush();
 
+            for (int j = 0; j < continents.size(); j++) {
+                String Strcontinents = continents.get(j).getName();
+                for (int i = 0; i < str.size(); i++) {
+                    if(str.get(i).contains(Strcontinents)) {
+                        bufw.write(str.get(i)+"\n");
+                    }
+
+                    bufw.flush();
+                }
+                bufw.write("\n");
+
+            }
+            
             bState = true;
         } catch (IOException e) {
             e.printStackTrace();
