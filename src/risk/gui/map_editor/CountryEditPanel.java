@@ -50,7 +50,7 @@ public class CountryEditPanel extends JPanel {
 	private HashMap<Point, LinkedList<Point>> edgeHashMap;
 	private Country selectedCountry;
 	private LinkedList<Continent> continentList;
-	
+	private ListenForComboBox listenForComboBox;
 	
 	public CountryEditPanel(MapEditorController controller) {
 		this.setOpaque(true);
@@ -66,7 +66,7 @@ public class CountryEditPanel extends JPanel {
 		
 		this.selectedCountry = null;
 		this.continentList = new LinkedList<Continent>();
-		
+		this.listenForComboBox = new ListenForComboBox();
 
 	}
 	
@@ -90,7 +90,7 @@ public class CountryEditPanel extends JPanel {
 		continentPanel.setMaximumSize(new Dimension(WIDTH, CONTINENT_FIELD_HEIGHT));
 		continentPanel.setBorder(BorderFactory.createTitledBorder("Continent"));
 		continentComboBox = new JComboBox<>();
-		continentComboBox.addItemListener(new ListenForComboBox());
+		continentComboBox.addItemListener(listenForComboBox);
 		continentComboBox.setPreferredSize(new Dimension(130,20));
 		continentPanel.add(continentComboBox);
 		
@@ -123,12 +123,12 @@ public class CountryEditPanel extends JPanel {
 		((JTextField) nameFieldPanel.getComponent(0)).setText("");
 		continentComboBox.removeAllItems();
 		linksPanel.removeAll();
+		this.selectedCountry = null;
 		this.revalidate();
 	}
 	
 	public void updateInfo() {
 		Component[] components = nameFieldPanel.getComponents();
-		//this.selectedCountry = controller.getSelectedCountry();
 		if (this.selectedCountry != null) {
 			this.selectedCountry.setName(((JTextField)components[0]).getText());
 			this.selectedCountry.setContinentName((String)continentComboBox.getSelectedItem());
@@ -143,6 +143,9 @@ public class CountryEditPanel extends JPanel {
 	}
 	
 	private void updateContinentPanel() {
+		continentComboBox.removeItemListener(listenForComboBox);
+		
+		continentList = controller.getContinentList();
 		continentComboBox.getItemCount();
 		LinkedList<String> comboBoxContent = new LinkedList<String>();
 		for (int i = 0; i < continentComboBox.getItemCount(); i++) {
@@ -157,6 +160,7 @@ public class CountryEditPanel extends JPanel {
 		continentComboBox.setSelectedItem(this.selectedCountry.getContinentName());
 		continentPanel.revalidate();
 		continentPanel.repaint();
+		continentComboBox.addItemListener(listenForComboBox);
 	}	
 	
 	private void updateLinkPanel() {
@@ -211,7 +215,7 @@ public class CountryEditPanel extends JPanel {
 			}
 								
 			try {
-				newContinentValue = Integer.valueOf(continentValueText = continentValueField.getText());
+				newContinentValue = Integer.valueOf(continentValueText);
 				if (newContinentValue < 0) {
 					JOptionPane.showMessageDialog(null, "Continent value should be a positive integer.");
 					continue;
@@ -223,8 +227,9 @@ public class CountryEditPanel extends JPanel {
 			}
 			
 			controller.addContinent(newContinentName, newContinentValue);
-			this.continentComboBox.addItem(newContinentName);
-			//updateContinentPanel();
+			this.updateContinentPanel();
+			//this.continentComboBox.addItem(newContinentName);
+			//this.continentComboBox.getModel().setSelectedItem(null);
 			break;
 		}		
 	}

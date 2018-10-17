@@ -1,5 +1,6 @@
 package risk.game;
 
+import java.awt.Dimension;
 import java.awt.Point;
 import java.util.Collection;
 import java.util.HashMap;
@@ -13,12 +14,27 @@ public class RiskMap {
 	public static final int MAX_CONTINENT = 32;
 	public static final int MAX_COUNTRY = 255;
 		
+
+	private Dimension size;
 	private HashMap<String, Continent> continentList;
 	private HashMap<Point, Country> countryList;
 	
 	public RiskMap() {
 		continentList = new HashMap<String, Continent>();
 		countryList = new HashMap<Point, Country>();
+		size = new Dimension();
+	}
+	
+	public void setSize(Dimension newSize) {
+		size.setSize(newSize);
+	}
+	
+	public void setSize(int x, int y) {
+		size.setSize(x, y);
+	}
+	
+	public Dimension getSize() {
+		return size;
 	}
 	
 	public boolean addContinent(String name, int value) {
@@ -74,7 +90,11 @@ public class RiskMap {
 			c.removeAdjacentCountry(removedCountry.getName());
 		}
 	}
-
+	
+	public Country getCountry(Point location) {
+		return countryList.get(location);
+	}
+	
 	public LinkedList<Country> getCountryList() {
 		LinkedList<Country> list = new LinkedList<Country>();
 		for (Country country : countryList.values()) {
@@ -83,19 +103,6 @@ public class RiskMap {
 		
 		return list;
 	}
-	
-//TODO
-/*	public boolean addEdge(Country start, Country dest) {
-		start.addAdjacentCountry(dest.getName());
-		dest.addAdjacentCountry(start.getName());
-	}
-*/	
-	
-// TODO	
-//	public boolean addEdge(Point start, Point dest) {
-		
-//	}
-	
 }
 
 

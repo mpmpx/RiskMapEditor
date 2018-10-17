@@ -2,6 +2,7 @@ package risk.contorller;
 
 import java.awt.Color;
 import java.awt.Point;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -12,17 +13,17 @@ import risk.game.Country;
 import risk.game.RiskMap;
 import risk.gui.component.CountryComponent;
 import risk.gui.map_editor.MapEditorPanel;
-import risk.gui.utilities.ColorList;
+import risk.gui.utilities.ColorPool;
+import risk.io.RiskMapIO;
 
 public class MapEditorController {
 	
+	private static int defaultName;
 	private MapEditorPanel mapEditorPanel;
 	private RiskMap currentMap;
 	private Country selectedCountry;
+	private ColorPool colorPool;
 	private HashMap<String, Color> continentColorHashMap;
-	private static int defaultName = 0;
-	
-	
 	private LinkedList<Continent> continentList;
 	private HashMap<Point, Country> countryHashMap;
 	private HashMap<Point, LinkedList<Point>> edgeHashMap;
@@ -32,7 +33,7 @@ public class MapEditorController {
 	private boolean isEditPanelActive;
 	private boolean isSaved;
 	private boolean addCountryFlag;
-	
+	private RiskMapIO riskMapIO;
 	
 	public MapEditorController(MapEditorPanel mapEditorPanel) {
 		this.mapEditorPanel = mapEditorPanel;
@@ -41,7 +42,9 @@ public class MapEditorController {
 		continentColorHashMap = new HashMap<String, Color>();
 		edgeHashMap = new HashMap<Point, LinkedList<Point>>();
 		selectedCountry = null;		
-
+		colorPool = new ColorPool();
+		riskMapIO = new RiskMapIO();
+		
 		InitFlag();
 	}
 	
@@ -60,79 +63,72 @@ public class MapEditorController {
 		continentColorHashMap = new HashMap<String, Color>();
 		edgeHashMap = new HashMap<Point, LinkedList<Point>>();
 		selectedCountry = null;		
+		colorPool = new ColorPool();
+		InitFlag();
 		
 		this.mapEditorPanel.clear();		
 	}
 	
 	public void createNewMap() {
+		this.clear();
 		isDisplayPanelActive = true;
 		isSaved = true;
+		defaultName = 0;
 		
-		this.clear();		
+		
 		this.mapEditorPanel.enableMapDisplayPanel(isDisplayPanelActive);
 	}
 	
 	public void loadMap(String fileAbsolutePath) {
 		this.clear();
+		this.mapEditorPanel.enableMapDisplayPanel(true);
 		isSaved = true;
-		System.out.println(fileAbsolutePath);
+		riskMapIO = new RiskMapIO();
+		
+		try {
+			this.currentMap = riskMapIO.readFile(fileAbsolutePath);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		this.mapEditorPanel.setMapSize(currentMap.getSize().width, currentMap.getSize().height);
+		for (Continent continent : currentMap.getContinentList()) {
+			this.addContinent(continent.getName(), continent.getValue());
+		}
+		
+		for (Country country : currentMap.getCountryList()) {
+			this.edgeHashMap.put(country.getLocation(), country.getAdjacentCountryList());
+
+			this.countryHashMap.put(country.getLocation(), country);
+			this.mapEditorPanel.addCountry(country);
+		}		
+		this.mapEditorPanel.updateMapDisplay();
 	}
 
 	public void saveMap(String fileAbsolutePath) {
 		isSaved = true;
 		currentMap = new RiskMap();
+		riskMapIO = new RiskMapIO();
+		
 		for (Continent continent : continentList) {
 			currentMap.addContinent(continent);
 		}
-		
-		if (edgeHashMap == null) {
-			System.out.println("edgeHashMap is null");
-		}
-		else {
-			System.out.println("edgeHashMap is not null");
-			
-			for (LinkedList<Point> clist : edgeHashMap.values()) {
-				for (Point point : clist) {
-					System.out.print("(" + point.x + ", " + point.y + "), ");
-				}
-				System.out.println();
-			}
-			
-		}
-		
-		//countryHashMap.remove(new Point(0,0));
+
 		for (Country country : countryHashMap.values()) {
-			//System.out.println(country.getX() + ", " + country.getY());
-			System.out.println(country.getName() +", " + country.getX() + ", " +country.getY());
 			for (Point location : edgeHashMap.get(country.getLocation())) {
 				country.addAdjacentCountry(location);
 			}
 			currentMap.addCountry(country);
 		}
-		
-		
-		System.out.println("[Continent]");
-		for (Continent continent : currentMap.getContinentList()) {
-			System.out.println(continent.getName() + ": " + continent.getValue());
+	
+		try {
+			riskMapIO.saveFile(currentMap, fileAbsolutePath);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		System.out.println();
-		
-		for (Country country : currentMap.getCountryList()) {
-			System.out.print(country.getName() + ", " + country.getContinentName() + ", " + country.getX() + ", " + country.getY());
-			for (Point location : country.getAdjacentCountryList()) {
-				String name = "";
-				for (Country c : currentMap.getCountryList()) {
-					if (location.equals(c.getLocation())) {
-						name = c.getName();
-					}
-				}
-				System.out.print(", " + name);
-			}
-			System.out.println();;
-		}
-		
-		
-		System.out.println(fileAbsolutePath);		
 	}
 	
 	public boolean isMapSaved() {
@@ -169,10 +165,16 @@ public class MapEditorController {
 	}
 	
 	public void addCountry(CountryComponent countryComponent) {
-		//System.out.println("adding country");
 		Country country = new Country(countryComponent.getCenterLocation());
 		country.setName("" + (++defaultName));
 		countryHashMap.put(countryComponent.getCenterLocation(), country);
+		addCountryFlag = false;
+		isSaved = false;
+	}
+	
+	public void addCountry(Country country) {
+		country.setName("" + (++defaultName));
+		countryHashMap.put(country.getLocation(), country);
 		addCountryFlag = false;
 		isSaved = false;
 	}
@@ -232,7 +234,6 @@ public class MapEditorController {
 		for (Country country : countryHashMap.values()) {
 			if (name.equals(country.getName())) {
 				secondLocation = country.getLocation();
-				System.out.println(secondLocation.x + ", " + secondLocation.y);
 			}
 		}
 		
@@ -250,7 +251,7 @@ public class MapEditorController {
 	
 	public void addContinent(String continentName, int continentValue) {
 		continentList.add(new Continent(continentName, continentValue));
-		continentColorHashMap.put(continentName, ColorList.get());
+		continentColorHashMap.put(continentName, colorPool.get());
 		isSaved = false;
 	}
 	

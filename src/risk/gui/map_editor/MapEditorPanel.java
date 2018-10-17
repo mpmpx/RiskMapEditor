@@ -5,7 +5,7 @@ import risk.game.Country;
 import risk.gui.MainFrame;
 import risk.gui.MenuPanel;
 import risk.gui.component.CountryComponent;
-import risk.gui.utilities.ColorList;
+import risk.gui.utilities.ColorPool;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -91,6 +91,10 @@ public class MapEditorPanel extends JPanel {
 			this.mapDisplayPanel.getScrollPane().setPreferredSize(new Dimension( MapDisplayPanel.WIDTH, MapDisplayPanel.HEIGHT));
 		}
 		this.mapDisplayPanel.getScrollPane().revalidate();
+	}
+	
+	public void addCountry(Country country) {
+		mapDisplayPanel.addCountry(country);
 	}
 	
 	private void enableAllComponent(Container container, boolean enable) {

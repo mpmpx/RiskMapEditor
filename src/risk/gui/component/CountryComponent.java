@@ -26,7 +26,7 @@ public class CountryComponent extends JButton{
 	private Point centerLocation;
 	private Color backgroundColor;
 	private Color borderColor;
-	public static final int Radius = 12;
+	public static final int Radius = 8;
 	
 	// Country country;
 		

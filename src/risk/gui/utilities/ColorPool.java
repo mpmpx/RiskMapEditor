@@ -3,7 +3,7 @@ package risk.gui.utilities;
 import java.awt.Color;
 import java.util.Stack;
 
-public class ColorList {
+public class ColorPool {
 	private static int index = 0;
 	private static final Color[] COLOR_LIST = {
 			new Color(220,35,35), new Color(223,181,32), 
@@ -23,9 +23,9 @@ public class ColorList {
 			new Color(122,74,181), new Color(181,74,165), 
 			new Color(114,143,112), new Color(142,140,113),			
 	};
-	private static Stack<Color> stack;
+	private Stack<Color> stack;
 	
-	private ColorList() {
+	public ColorPool() {
 		stack = new Stack<Color>();
 		
 		for (int i = COLOR_LIST.length - 1; i >= 0; i--) {
@@ -33,19 +33,11 @@ public class ColorList {
 		}
 	}
 	
-	public static Color get() {
-		if (stack == null) {
-			stack = new Stack<Color>();
-			
-			for (int i = COLOR_LIST.length - 1; i >= 0; i--) {
-				stack.push(COLOR_LIST[i]);
-			}		
-		}
-				
+	public Color get() {
 		return stack.pop();
 	}
 	
-	public static void put(Color color) {
+	public void put(Color color) {
 		stack.push(color);
 	}
 }

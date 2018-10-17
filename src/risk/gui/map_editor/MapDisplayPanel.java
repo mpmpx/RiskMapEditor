@@ -124,6 +124,18 @@ class MapDisplayPanel extends JPanel implements MouseInputListener {
 		}
 	}
 
+	public void addCountry(Country country) {
+		CountryComponent countryComponent = new CountryComponent();
+		countryComponent.addActionListener(new countryActionListener());
+		countryComponent.addMouseListener(new countryMouseListener());
+		countryComponent.setBackground(new Color(123,123,123));
+		countryComponent.setForeground(new Color(123,123,123));
+		countryComponent.setLocationAtPoint(country.getLocation());
+					
+		this.add(countryComponent);
+		this.repaint();
+		this.revalidate();
+	}
 	
 	public void removeCountry(Point location) {
 		Component[] buttons = this.getComponents();
@@ -159,9 +171,7 @@ class MapDisplayPanel extends JPanel implements MouseInputListener {
 				countryComponent.setBackground(new Color(123,123,123));
 				countryComponent.setForeground(new Color(123,123,123));
 				countryComponent.setLocationAtPoint(e.getPoint());
-			
-				System.out.println("addcountry: " + countryComponent.getCenterLocation().x + ", " + countryComponent.getCenterLocation().y);
-				
+							
 				this.add(countryComponent);
 				controller.addCountry(countryComponent);
 				this.repaint();
@@ -172,50 +182,34 @@ class MapDisplayPanel extends JPanel implements MouseInputListener {
 	}
 
 	@Override
-	public void mouseEntered(MouseEvent arg0) {
-		
-	}
-
-	@Override
-	public void mouseExited(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void mousePressed(MouseEvent e) {
-
-	}
-
-	@Override
 	public void mouseReleased(MouseEvent e) {	
 		//System.out.println("display panel: released");
 		//System.out.println("display panel release at " + e.getX() + ", " + e.getY());
-		
-		if (this.isEnabled() == true) {
-			if (controller.getAddCountryFlag() == false) {
-				Component[] allComponents = this.getComponents();
-				for (Component component : allComponents) {
-					if (component instanceof CountryComponent) {
-						CountryComponent button = (CountryComponent)component;
-						if (Math.hypot(button.getCenterLocation().x - e.getX(),
-								button.getCenterLocation().y - e.getY()) < CountryComponent.Radius) {
-							destX = button.getCenterLocation().x;
-							destY = button.getCenterLocation().y;				
+		Country selectedCounty = controller.getSelectedCountry();
+		if (this.isEnabled() == true &&controller.getAddCountryFlag() == false && selectedCounty != null) {
+			Component[] allComponents = this.getComponents();
+			for (Component component : allComponents) {
+				if (component instanceof CountryComponent) {
+					CountryComponent button = (CountryComponent)component;
+					if (Math.hypot(button.getCenterLocation().x - e.getX(),
+							button.getCenterLocation().y - e.getY()) < CountryComponent.Radius) {
+						destX = button.getCenterLocation().x;
+						destY = button.getCenterLocation().y;				
 
-							if (startX != destX && startY != destY) {
-								controller.addLink(new Point(startX, startY), new Point(destX, destY));
-							}
-							startX = 0;
-							startY = 0;
-							destX = 0;
-							destY = 0;
-							this.repaint();
-							return;
+						if (startX != destX && startY != destY) {
+							controller.addLink(new Point(startX, startY), new Point(destX, destY));
 						}
+						startX = 0;
+						startY = 0;
+						destX = 0;
+						destY = 0;
+						this.repaint();
+						return;
 					}
 				}
 			}
 		}
+		
 		startX = 0;
 		startY = 0;
 		destX = 0;
@@ -226,7 +220,8 @@ class MapDisplayPanel extends JPanel implements MouseInputListener {
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		countryHashMap = controller.getCountryHashMap();
-		if (this.isEnabled() == true && controller.getAddCountryFlag() == false) {
+		Country selectedCounty = controller.getSelectedCountry();
+		if (this.isEnabled() == true && controller.getAddCountryFlag() == false && selectedCounty != null) {
 			if (countryHashMap.containsValue(controller.getSelectedCountry())) {
 				this.startX = controller.getSelectedCountry().getX();
 				this.startY = controller.getSelectedCountry().getY();
@@ -296,6 +291,26 @@ class MapDisplayPanel extends JPanel implements MouseInputListener {
 			//System.out.println("button release at " + e.getX() + ", " + e.getY());
 			
 		}
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void mousePressed(MouseEvent arg0) {
+		// TODO Auto-generated method stub
 		
 	}
 	

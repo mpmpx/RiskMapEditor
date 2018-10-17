@@ -111,9 +111,28 @@ class EditorMenuPanel extends JPanel {
 				controller.setAddCountryFlag(true);
 			}
 			else if (selectedBtn == backButton) {
-				MainFrame frame = MainFrame.getInstance();
-				frame.setCurrentPanel(MainFrame.MENU_PANEL);
-				frame.SetSize(MenuPanel.WIDTH, MenuPanel.HEIGHT);			
+				if (controller.isMapSaved() == false) {
+					int option = JOptionPane.showConfirmDialog(null, "Your current map is not saved. Do you want to save it?",
+							"", JOptionPane.YES_NO_CANCEL_OPTION);
+					
+					if (option == JOptionPane.OK_OPTION) {
+						saveMap();
+					} 
+					else if (option == JOptionPane.NO_OPTION){
+						MainFrame frame = MainFrame.getInstance();
+						frame.setCurrentPanel(MainFrame.MENU_PANEL);
+						frame.SetSize(MenuPanel.WIDTH, MenuPanel.HEIGHT);		
+						controller.clear();
+					} 
+				}
+				
+				if (controller.isMapSaved() == true) {
+					MainFrame frame = MainFrame.getInstance();
+					frame.setCurrentPanel(MainFrame.MENU_PANEL);
+					frame.SetSize(MenuPanel.WIDTH, MenuPanel.HEIGHT);	
+					controller.clear();
+				}
+	
 			}
 		}
 
