@@ -152,8 +152,8 @@ class EditorMenuPanel extends JPanel {
 			JTextField widthField = new JTextField();
 			JTextField heightField = new JTextField();
 			Object[] message = {
-					"Width:", widthSpinner,
-					"Height:", heightSpinner,
+					"Width: (0-5000)", widthSpinner ,
+					"Height: (0-5000)", heightSpinner,
 			};
 				
 			if (JOptionPane.showConfirmDialog(null, message,

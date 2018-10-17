@@ -9,19 +9,19 @@ import risk.game.Continent;
 import risk.game.Country;
 import risk.game.RiskMap;
 
-
+/**
+ * RiskMapIO class manages the reading and writing map information from or to a .map file.
+ * It also provides a format checking when reading a .map file to ensure the information can
+ * be correctly loaded into the map editor.
+ */
 public class RiskMapIO {
-
     private boolean bMapHead = false;
     private boolean bContinent = false;
     private boolean bterritories = false;
-
     private String label = "";
 
     private LinkedHashMap<String, Continent> continentMap = new LinkedHashMap<>();
-
-    private LinkedHashMap<String, Country> countryMap = new LinkedHashMap<>();
-    
+    private LinkedHashMap<String, Country> countryMap = new LinkedHashMap<>();  
     private RiskMap map;
     private HashMap<String, Country> countryHashMap;
     private LinkedList<Continent> continentList;
@@ -30,7 +30,9 @@ public class RiskMapIO {
     private int mapHeight;
     private int mapWidth;
 
-    
+    /**
+     * Constructor of the class. Initialize all class variables.
+     */
     public RiskMapIO() {
         map = new RiskMap();
         countryHashMap = new HashMap<String, Country>();
@@ -40,17 +42,26 @@ public class RiskMapIO {
         mapWidth = 0;
     }
 
-    private void validateBlockName() {
+    /**
+     * Check the format of block names.
+     * @throws IOException if the file does not contain necessary blocks.
+     */
+    private void validateBlockName() throws IOException  {
         if (!(bContinent && bterritories)) {
-         //   throw new IllegalArgumentException("bolck name is invalid!");
+            throw new IllegalArgumentException("bolck name is invalid!");
         }
     }
 
-    private void validateContinent() {
+    /**
+     * Check the value of continents and validation of the continent of each country.
+     * @throws IOException if the value of a continent is 0 or some countries contain
+     * an invalid continent.
+     */
+    private void validateContinent() throws IOException {
     	boolean found = false;
     	for (Continent continent : continentList) {
     		if (continent.getValue() == 0) {
-    			throw new IllegalArgumentException("Continent " + continent.getName() + " has value 0");
+    			throw new IOException("Continent " + continent.getName() + " has value 0");
     		}
     	}
     	
@@ -58,32 +69,43 @@ public class RiskMapIO {
     		found = false;
     		for (Continent continent : continentList) {
     			if (continent.getName().equals(country.getContinentName())) {
-    				System.out.println(continent.getName() + ", " + country.getContinentName());
     				found = true;
     			}
     		}
     		
     		if (!found) {
-    			throw new IllegalArgumentException("Continent of " + country.getName() + ": " + country.getContinentName() + " is invalid.");
+    			throw new IOException("Continent of " + country.getName() + ": " + country.getContinentName() + " is invalid.");
     		}
     	}
     }
 
-    private void validateCountry() {
+    /**
+     * Validate every country and their adjacent countries.
+     * @throws IOException if a country's adjacent country is not valid or a country's adjacent
+     * country does not links to itself.
+     */
+    private void validateCountry() throws IOException {
     	for (Country country : countryHashMap.values()) {
     		for (String adjacent : edgeHashMap.get(country.getName())) {
     			if (countryHashMap.containsKey(adjacent) && edgeHashMap.containsKey(adjacent)) {
     				if (!edgeHashMap.get(adjacent).contains(country.getName())) {
-    					throw new IllegalArgumentException(country.getName() + " and " + adjacent + "do not link to each other.");
+    					throw new IOException(country.getName() + " and " + adjacent + "do not link to each other.");
     				}
     			}
     			else {
-    				throw new IllegalArgumentException("Adjacent country of " + country.getName() + ": " + adjacent + " is invalid.");
+    				throw new IOException("Adjacent country of " + country.getName() + ": " + adjacent + " is invalid.");
     			}
     		}
     	}
     }
-
+    
+    /**
+     * Read a .map file and store all information to an instance of RiskMap and check
+     * correctness of every information.
+     * @param pathName is the path name of the file to be read.
+     * @return an instance of RiskMap.
+     * @throws IOException if encounters IO error.
+     */
     public RiskMap readFile(String pathName) throws IOException {
     	File file = new File(pathName);
         BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
@@ -101,12 +123,8 @@ public class RiskMapIO {
                     }
                     case "[continents]": {
                         String[] token = line.split("=");
-                        try {
-                            Continent continent = new Continent(token[0], Integer.parseInt(token[1]));
-                            continentList.add(continent) ;
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        Continent continent = new Continent(token[0], Integer.parseInt(token[1]));
+                        continentList.add(continent) ;
                         
                         bContinent = true;
                         break;
@@ -143,6 +161,7 @@ public class RiskMapIO {
         });
         bufferedReader.close();
         this.validateBlockName();
+        this.validateBlockName();
         this.validateContinent();
         this.validateCountry();
         
@@ -162,39 +181,40 @@ public class RiskMapIO {
         return map;
     }
 
+    /**
+     * Write information stored in the RiskMap to .map file with appropriate format.
+     * @param map is an instance of RiskMap which contains all information.
+     * @param fileName is the path name of the file to be written.
+     * @throws IOException if encounters IO error.
+     */
     public void saveFile(RiskMap map, String fileName) throws IOException {   	    	
         this.map = map;
-
+        
         BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));;
-        try {
-        	writer.write("[Map]" + "\r\n");
-            writer.write("\r\n");
+        writer.write("[Map]" + "\r\n");
+        writer.write("\r\n");
 
-            writer.write("[Continents]" + "\r\n");
-            for (Continent continent : map.getContinentList()) {
-            	writer.write(continent.getName() + "=" + continent.getValue() + "\r\n");
-            }
-            writer.write("\r\n");
-
-            writer.write("[Territories]" + "\r\n");
-            for (Continent continent : map.getContinentList()) {
-            	for (Country country : map.getCountryList()) {
-            		if (country.getContinentName().equals(continent.getName())) {
-            			writer.write(country.getName()+ "," + country.getX() + "," + country.getY() + "," + country.getContinentName());
-            			for (Point adjacent : country.getAdjacentCountryList()) {
-            				writer.write("," + map.getCountry(adjacent).getName());
-            			}
-            			writer.write("\r\n");
-            		}
-            	}
-    			writer.write("\r\n");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            writer.close();
+        writer.write("[Continents]" + "\r\n");
+        for (Continent continent : map.getContinentList()) {
+        	writer.write(continent.getName() + "=" + continent.getValue() + "\r\n");
         }
+        writer.write("\r\n");
+
+        writer.write("[Territories]" + "\r\n");
+        for (Continent continent : map.getContinentList()) {
+        	for (Country country : map.getCountryList()) {
+        		if (country.getContinentName().equals(continent.getName())) {
+        			writer.write(country.getName()+ "," + country.getX() + "," + country.getY() + "," + country.getContinentName());
+            		for (Point adjacent : country.getAdjacentCountryList()) {
+            			writer.write("," + map.getCountry(adjacent).getName());
+            		}
+            		writer.write("\r\n");
+            	}
+            }
+    		writer.write("\r\n");
+        }
+
         writer.close();
     }
-
 
 }
