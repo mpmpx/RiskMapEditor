@@ -1,50 +1,49 @@
-package DataStructure;
+package risk.game;
 
-import java.util.ArrayList;
-import java.util.List;
+/**
+ * Continent class manages Continent information(name and value) of a *.map file.
+ * @author
+ * @version 1
+ */
 
 public class Continent {
 
-    private String name;
+	/**
+	 * name of a ontinent
+	 * value of a continent
+	 */
+	private String name;
+	private int value;
 
-    private int army;
+	/**
+	 * Constructor of the class. Initialize all class variables.
+	 */
+	public Continent() {
+		name = new String();
+		value = 0;
+	}
 
-    private List<Country> countries;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getArmy() {
-        return army;
-    }
-
-    public void setArmy(int army) {
-        this.army = army;
-    }
-
-    public List<Country> getCountries() {
-        return countries;
-    }
-
-    public void setCountries(List<Country> countries) {
-        this.countries = countries;
-    }
-
-    public Continent(String name, int army) {
-
-        if ("".equals(name.trim())||army==0){
-
-            throw new IllegalArgumentException("Invalid data for continent: "+ name+", army:"+army);
-        }
-        this.name = name;
-
-        this.army = army;
-
-        this.countries = new ArrayList<>();
-    }
+	/**
+	 * Constructor of the class. Initialize with input.
+	 */
+	public Continent(String name, int value) {
+		this.name = name;
+		this.value = value;
+	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public void setValue(int value) {
+		this.value = value;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public int getValue() {
+		return value;
+	}
 }

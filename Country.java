@@ -1,87 +1,104 @@
-package DataStructure;
+package risk.game;
 
-import javafx.scene.paint.Color;
+import java.awt.Point;
+import java.util.LinkedList;
 
-import java.util.ArrayList;
-import java.util.List;
+/**
+ * Country class manages Country information of a *.map file.
+ * @author
+ * @version 1
+ */
 
 public class Country {
+	public static final int MAX_ADJACENT_COUNTRIES = 10;
+	private String name;
+	//continent of which that Country belongs to
+	private String continent;
+	private Point location;
+	//all the adjacent country list
+	private LinkedList<Point> adjacentCountryList;
 
-    private Color color;
+	/**
+	 * Constructor of the class. Initialize all class variables.
+	 */
+	public Country() {
+		location = new Point();
+		adjacentCountryList = new LinkedList<Point>();
+	}
 
-    private String name;
+	/**
+	 * Constructor of the class. Initialize with name.
+	 */
+	public Country(String name) {
+		this.name = name;
+		location = new Point();
+		adjacentCountryList = new LinkedList<Point>();
+	}
 
-    private List<Country> adjacentCountry;
+	/**
+	 * Constructor of the class. Initialize with location.
+	 */
+	public Country(Point location) {
+		this.location = location;
+		adjacentCountryList = new LinkedList<Point>();
+	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public void setContinentName(String name) {
+		continent = name;
+	}
+	
+	public String getContinentName() {
+		return continent;
+	}
+	
+	public void setLocation(int x, int y) {
+		location = new Point(x, y);
+	}
+	
+	public void setLocation(Point location) {
+		this.location = location;
+	}
+	
+	public Point getLocation() {
+		return location;
+	}
+	
+	public int getX() {
+		return location.x;
+	}
+	
+	public int getY() {
+		return location.y;
+	}
 
-    private Coordinator coordinator;
 
-    private Continent continent;
+	/**
+	 * Method to add a new location to country list.
+	 * @param location new location
+	 */
+	public void addAdjacentCountry(Point location) {
+		if (!adjacentCountryList.contains(location)) {
+			adjacentCountryList.add(location);
+		}
+	}
 
-    private Player player;
-
-    public Color getColor() {
-        return color;
-    }
-
-    public void setColor(Color color) {
-        this.color = color;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public List<Country> getAdjacentCountry() {
-        return adjacentCountry;
-    }
-
-    public void setAdjacentCountry(List<Country> adjacentCountry) {
-        this.adjacentCountry = adjacentCountry;
-    }
-
-    public Coordinator getCoordinator() {
-        return coordinator;
-    }
-
-    public void setCoordinator(Coordinator coordinator) {
-        this.coordinator = coordinator;
-    }
-
-    public Player getPlayer() {
-        return player;
-    }
-
-    public void setPlayer(Player player) {
-        this.player = player;
-    }
-
-    public Country(String name, Coordinator coordinator) {
-
-        this.name = name;
-
-        this.coordinator = coordinator;
-
-        this.adjacentCountry = new ArrayList<>();
-    }
-
-    public Continent getContinent() {
-        return continent;
-    }
-
-    public void setContinent(Continent continent) {
-
-        this.continent = continent;
-    }
-
-    public Country(String name){
-
-        this.name = name;
-
-        this.adjacentCountry = new ArrayList<>();
-    }
+	/**
+	 * Method to remove a exist Country from the AdjacentCountry list
+	 * @param country  the name of Country to be removed
+	 */
+	public boolean removeAdjacentCountry(String name) {
+		return adjacentCountryList.remove(name);
+	}
+	
+	public LinkedList<Point> getAdjacentCountryList() {
+		return adjacentCountryList;
+	}
 }
-
