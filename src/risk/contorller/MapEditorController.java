@@ -37,7 +37,6 @@ public class MapEditorController {
 	private boolean isEditPanelActive;
 	private boolean isSaved;
 	private boolean addCountryFlag;
-	private RiskMapIO riskMapIO;
 	
 	/**
 	 * Constructor initializes all class variables.
@@ -50,9 +49,7 @@ public class MapEditorController {
 		continentColorHashMap = new HashMap<String, Color>();
 		edgeHashMap = new HashMap<Point, LinkedList<Point>>();
 		selectedCountry = null;		
-		colorPool = new ColorPool();
-		riskMapIO = new RiskMapIO();
-		
+		colorPool = new ColorPool();		
 		InitFlag();
 	}
 	
@@ -100,18 +97,19 @@ public class MapEditorController {
 	 * @param fileAbsolutePath is the absolute path of the file to be loaded.
 	 */
 	public void loadMap(String fileAbsolutePath) {
-		
+
+		this.clear();
 		try {
+			RiskMapIO riskMapIO = new RiskMapIO();
 			this.currentMap = riskMapIO.readFile(fileAbsolutePath);
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(this.mapEditorPanel, e.getMessage(), "error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		
-		this.clear();
+
 		this.mapEditorPanel.enableMapDisplayPanel(true);
 		isSaved = true;
-		riskMapIO = new RiskMapIO();
 		
 		this.mapEditorPanel.setMapSize(currentMap.getSize().width, currentMap.getSize().height);
 		for (Continent continent : currentMap.getContinentList()) {
@@ -132,7 +130,8 @@ public class MapEditorController {
 	 * @param fileAbsolutePath is the absolute path of the save to be saved.
 	 */
 	public void saveMap(String fileAbsolutePath) {
-
+		RiskMapIO riskMapIO = new RiskMapIO();
+		
 		for (Continent continent : continentList) {
 			currentMap.addContinent(continent);
 		}
@@ -303,19 +302,28 @@ public class MapEditorController {
 			LinkedList<Point> adjacentCountryList = new LinkedList<Point>();
 			edgeHashMap.put(firstLocation, adjacentCountryList);
 		}
-
-		if (!edgeHashMap.get(firstLocation).contains(secondLocation)) {
-				edgeHashMap.get(firstLocation).add(secondLocation);
-		}
-		
 		
 		if (!edgeHashMap.containsKey(secondLocation)){
 			LinkedList<Point> adjacentCountryList = new LinkedList<Point>();
 			edgeHashMap.put(secondLocation, adjacentCountryList);
 		}
 
-		if (!edgeHashMap.get(secondLocation).contains(firstLocation)) {
-				edgeHashMap.get(secondLocation).add(firstLocation);
+		if (!edgeHashMap.get(firstLocation).contains(secondLocation) && !edgeHashMap.get(secondLocation).contains(firstLocation)) {
+			if (edgeHashMap.get(firstLocation).size() >= Country.MAX_ADJACENT_COUNTRIES) {
+				JOptionPane.showMessageDialog(this.mapEditorPanel,  "A country cannot have more than 10 adjacent countries."
+						, "Error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			
+			if (edgeHashMap.get(secondLocation).size() >= Country.MAX_ADJACENT_COUNTRIES) {
+				JOptionPane.showMessageDialog(this.mapEditorPanel,  "A country cannot have more than 10 adjacent countries."
+						, "Error", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			edgeHashMap.get(firstLocation).add(secondLocation);	
+			edgeHashMap.get(secondLocation).add(firstLocation);
+		} else {
+			return;
 		}
 		
 		this.mapEditorPanel.updateEditPanel();

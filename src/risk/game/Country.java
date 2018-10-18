@@ -4,7 +4,7 @@ import java.awt.Point;
 import java.util.LinkedList;
 
 public class Country {
-	public static final int MAX_ADJACENT_COUNTRY = 10;
+	public static final int MAX_ADJACENT_COUNTRIES = 10;
 	private String name;
 	private String continent;
 	private Point location;

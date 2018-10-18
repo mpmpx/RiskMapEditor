@@ -48,7 +48,7 @@ public class RiskMapIO {
      */
     private void validateBlockName() throws IOException  {
         if (!(bContinent && bterritories)) {
-            throw new IllegalArgumentException("bolck name is invalid!");
+            throw new IOException("bolck name is invalid!");
         }
     }
 
@@ -86,6 +86,9 @@ public class RiskMapIO {
      */
     private void validateCountry() throws IOException {
     	for (Country country : countryHashMap.values()) {
+    		if (edgeHashMap.get(country.getName()).size() > Country.MAX_ADJACENT_COUNTRIES) {
+    			throw new IOException(country.getName() + " has more than 10 adjacent countries.");
+    		}
     		for (String adjacent : edgeHashMap.get(country.getName())) {
     			if (countryHashMap.containsKey(adjacent) && edgeHashMap.containsKey(adjacent)) {
     				if (!edgeHashMap.get(adjacent).contains(country.getName())) {

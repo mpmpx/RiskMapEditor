@@ -13,7 +13,6 @@ public class RiskMap {
 
 	public static final int MAX_CONTINENT = 32;
 	public static final int MAX_COUNTRY = 255;
-		
 
 	private Dimension size;
 	private HashMap<String, Continent> continentList;
