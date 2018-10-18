@@ -1,5 +1,3 @@
 /bin/
-Continent.java
-Country.java
-RiskMap.java
-RiskMapIO.java
+/.gitignore
+/.gitattributes
