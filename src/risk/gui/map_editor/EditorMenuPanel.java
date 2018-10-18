@@ -30,11 +30,11 @@ import risk.gui.MenuPanel;
  * 4. create a new country on the current map;
  * 5. return to the menu.
  */
-
 class EditorMenuPanel extends JPanel {
 	
 	private static final int HEIGHT = 200;
 	private static final int WIDTH = 200;	
+  
 	private MapEditorPanel rootPanel;
 	private JButton loadButton;
 	private JButton saveButton;
@@ -77,7 +77,6 @@ class EditorMenuPanel extends JPanel {
 		this.add(backButton);
 	}
 	
-
 	/**
 	 * This function is called when the "New" button is clicked.
 	 * Pop up a window to set the size of new map.
@@ -236,4 +235,3 @@ class EditorMenuPanel extends JPanel {
 		}
 	}
 }
-
