@@ -3,6 +3,9 @@ package risk.gui.utilities;
 import java.awt.Color;
 import java.util.Stack;
 
+/**
+ * ColorPool class provides a list of color.
+ */
 public class ColorPool {
 	private static int index = 0;
 	private static final Color[] COLOR_LIST = {
@@ -25,6 +28,10 @@ public class ColorPool {
 	};
 	private Stack<Color> stack;
 	
+	/**
+	 * Constructor which initializes class variables and put all colors
+	 * in a stack.
+	 */
 	public ColorPool() {
 		stack = new Stack<Color>();
 		
@@ -33,10 +40,18 @@ public class ColorPool {
 		}
 	}
 	
+	/**
+	 * Get a color from the stack.
+	 * @return a color on the top of the stack.
+	 */
 	public Color get() {
 		return stack.pop();
 	}
 	
+	/**
+	 * Put a color on the top of the stack.
+	 * @param color is the color to be put.
+	 */
 	public void put(Color color) {
 		stack.push(color);
 	}

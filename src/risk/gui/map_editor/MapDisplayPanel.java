@@ -8,11 +8,9 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -22,6 +20,13 @@ import risk.contorller.MapEditorController;
 import risk.game.Country;
 import risk.gui.component.CountryComponent;
 
+/**
+ * MapDisplayPanel class is an instance of JPanl which provides a sub-panel of 
+ * the MapEditor panel. It displays information of map in the panel. Circles represents countries
+ * and their colors represent different continent. Lines between circles represent a link between
+ * these two countries. Also, when click a circle, the border of the circle turns to black meaning
+ * it is selected.
+ */
 class MapDisplayPanel extends JPanel implements MouseInputListener {
 
 	public static final int WIDTH = 900;
@@ -39,6 +44,11 @@ class MapDisplayPanel extends JPanel implements MouseInputListener {
 	private HashMap<String, Color> continentColorHashMap;
 	private HashMap<Point, LinkedList<Point>> edgeList;
 	
+	/**
+	 * Constructor of the class. Initialize all class variables, add listeners,
+	 * and create a scroll panel to wrap the MapDisplay panel.
+	 * @param controller is the controller of the MapEditor panel. 
+	 */
 	public MapDisplayPanel(MapEditorController controller) {
 		this.setLayout(null);
 		this.setOpaque(true);
@@ -62,12 +72,19 @@ class MapDisplayPanel extends JPanel implements MouseInputListener {
 		
 	}
 	
-	
+	/**
+	 * Get the scroll panel.
+	 * @return the scroll panel.
+	 */
 	public JScrollPane getScrollPane(){
 
 		return scrollPane;
 	}
-
+	
+	/**
+	 * Overwrite the paint method which paints all existing edges on the display area.
+	 * @param g is the graph.
+	 */
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		edgeList = controller.getEdgeHashMap();		
@@ -89,11 +106,18 @@ class MapDisplayPanel extends JPanel implements MouseInputListener {
 		}
 	}
 	
+	/**
+	 * This method cleans up all things in the display area.
+	 */
 	public void clear() {
 		this.removeAll();
 		this.repaint();
 	}
 	
+	/**
+	 * Repaint and Update information of the MapDisplay 
+	 * panel according to data stored in the controller.
+	 */
 	public void updateInfo() {
 		countryHashMap = controller.getCountryHashMap();
 		continentColorHashMap = controller.getContinentColorHashMap();
@@ -115,6 +139,9 @@ class MapDisplayPanel extends JPanel implements MouseInputListener {
 		this.repaint();
 	}
 	
+	/**
+	 * Unselect all countries in the display area.
+	 */
 	public void unSelectCountry() {
 		Component[] buttons = this.getComponents();
 		for (Component btn : buttons) {
@@ -124,10 +151,13 @@ class MapDisplayPanel extends JPanel implements MouseInputListener {
 		}
 	}
 
+	/**
+	 * Add and draw a new circle representing a country on the display area.
+	 * @param country
+	 */
 	public void addCountry(Country country) {
 		CountryComponent countryComponent = new CountryComponent();
 		countryComponent.addActionListener(new countryActionListener());
-		countryComponent.addMouseListener(new countryMouseListener());
 		countryComponent.setBackground(new Color(123,123,123));
 		countryComponent.setForeground(new Color(123,123,123));
 		countryComponent.setLocationAtPoint(country.getLocation());
@@ -137,6 +167,10 @@ class MapDisplayPanel extends JPanel implements MouseInputListener {
 		this.revalidate();
 	}
 	
+	/**
+	 * Erase and delete a circle based on given location on the display area.
+	 * @param location is the location of the circle to be removed.
+	 */
 	public void removeCountry(Point location) {
 		Component[] buttons = this.getComponents();
 		for (Component btn : buttons) {
@@ -150,6 +184,11 @@ class MapDisplayPanel extends JPanel implements MouseInputListener {
 		this.repaint();
 	}
 	
+	/**
+	 * Implements a function of the MouseListener which is called when the mouse is clicked
+	 * on the display area. When creating a new country, this function creates and adds a new
+	 * circle on the display area.
+	 */
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		countryHashMap = controller.getCountryHashMap();
@@ -167,7 +206,6 @@ class MapDisplayPanel extends JPanel implements MouseInputListener {
 				
 				CountryComponent countryComponent = new CountryComponent();
 				countryComponent.addActionListener(new countryActionListener());
-				countryComponent.addMouseListener(new countryMouseListener());
 				countryComponent.setBackground(new Color(123,123,123));
 				countryComponent.setForeground(new Color(123,123,123));
 				countryComponent.setLocationAtPoint(e.getPoint());
@@ -181,10 +219,14 @@ class MapDisplayPanel extends JPanel implements MouseInputListener {
 		}
 	}
 
+	/**
+	 * Implements a function of the MouseListener which is called when the mouse is released.
+	 * When dragging and creating a link between two circles, if the mouse is released inside another
+	 * circle which has not connected to the selected circle, a new line will be created between 
+	 * the selected circle and this circle.
+	 */
 	@Override
 	public void mouseReleased(MouseEvent e) {	
-		//System.out.println("display panel: released");
-		//System.out.println("display panel release at " + e.getX() + ", " + e.getY());
 		Country selectedCounty = controller.getSelectedCountry();
 		if (this.isEnabled() == true &&controller.getAddCountryFlag() == false && selectedCounty != null) {
 			Component[] allComponents = this.getComponents();
@@ -217,6 +259,11 @@ class MapDisplayPanel extends JPanel implements MouseInputListener {
 		this.repaint();
 	}
 
+	/**
+	 * Implements a function of the MouseListener which is called when dragging the mouse. 
+	 * When a circle is selected, dragging mouse on the display panel dynamically creates a line
+	 * from the selected circle to the position of the mouse.
+	 */
 	@Override
 	public void mouseDragged(MouseEvent e) {
 		countryHashMap = controller.getCountryHashMap();
@@ -225,8 +272,6 @@ class MapDisplayPanel extends JPanel implements MouseInputListener {
 			if (countryHashMap.containsValue(controller.getSelectedCountry())) {
 				this.startX = controller.getSelectedCountry().getX();
 				this.startY = controller.getSelectedCountry().getY();
-				
-				//System.out.println(this.startX + ", " + this.startY);
 				this.destX = e.getX();
 				this.destY = e.getY();
 				this.repaint();
@@ -234,21 +279,48 @@ class MapDisplayPanel extends JPanel implements MouseInputListener {
 		}
 	}
 
+	/**
+	 * Implements a function of the MouseListener which is called when moving the mouse. 
+	 * Get the location of the mouse when moving it.
+	 */
 	@Override
-	public void mouseMoved(MouseEvent e) {
-		/* TODO Auto-generated method stub
-			System.out.println(e.getX() + ", " + e.getY());
-		*/
-		
+	public void mouseMoved(MouseEvent e) {		
 		if (controller.getAddCountryFlag() == true) {
 			cursorLocation.setLocation(e.getPoint());
 			repaint();
 		}
 	}
-	
 
+	/**
+	 * Unused methods of the MouseListener.
+	 */
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+	}
 	
+	/**
+	 * Unused methods of the MouseListener.
+	 */
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+	}
+
+	/**
+	 * Unused methods of the MouseListener.
+	 */
+	@Override
+	public void mousePressed(MouseEvent arg0) {
+	}
+
+	/**
+	 * This is an actionListener needs to be bind to country components
+	 */
 	private class countryActionListener implements ActionListener {
+		
+		/**
+		 * This method is called when a circle is clicked. Set the clicked circle 
+		 * as the selected country.
+		 */
 		@Override
 		public void actionPerformed(ActionEvent event) {
 			unSelectCountry();
@@ -257,61 +329,8 @@ class MapDisplayPanel extends JPanel implements MouseInputListener {
 			controller.setSelectedCountry(selectedCountryComponent.getCenterLocation());
 		}
 	}
-	
-	private class countryMouseListener implements MouseListener {
-
-		@Override
-		public void mouseClicked(MouseEvent arg0) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void mouseEntered(MouseEvent e) {
-			//System.out.println("entered");
-			
-		}
-
-		@Override
-		public void mouseExited(MouseEvent arg0) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void mousePressed(MouseEvent arg0) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void mouseReleased(MouseEvent e) {
-			// TODO Auto-generated method stub
-			//System.out.println("release");
-			//System.out.println("button release at " + e.getX() + ", " + e.getY());
-			
-		}
-		
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
 
 
-	@Override
-	public void mouseExited(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
 
 
-	@Override
-	public void mousePressed(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
-	
 }

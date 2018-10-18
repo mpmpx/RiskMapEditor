@@ -1,25 +1,19 @@
 package risk.gui.component;
 
-import risk.gui.*;
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Shape;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.geom.Ellipse2D;
 
 import javax.swing.JButton;
-import javax.swing.SwingConstants;
-import javax.swing.event.MouseInputListener;
 
-
-
+/**
+ * This class defines a circular component which represent a 
+ * city showing on the MapDisplay panel.
+ */
 public class CountryComponent extends JButton{
 	private Shape shape;
 	private Point componentLocation;
@@ -28,8 +22,9 @@ public class CountryComponent extends JButton{
 	private Color borderColor;
 	public static final int Radius = 8;
 	
-	// Country country;
-		
+	/**
+	 * Constructor of this class. Initialize all class variables.
+	 */
 	public CountryComponent() {
 		setSize(Radius * 2, Radius * 2);	
 		backgroundColor = this.getBackground();
@@ -43,7 +38,9 @@ public class CountryComponent extends JButton{
 		setContentAreaFilled(false);
 	}
 	  
-	// Draw and paint the button
+	/**
+	 * Draw and paint buttons and edges.
+	 */
 	protected void paintComponent(Graphics g) {
 		Graphics2D g2D = (Graphics2D) g;	
 		backgroundColor = getBackground();
@@ -53,7 +50,10 @@ public class CountryComponent extends JButton{
 		super.paintComponent(g);
 	}
 	
-	// Draw and paint the border of the button
+	/**
+	 * Draw and paint the border of the button.
+	 * @param g is the graph.
+	 */
 	protected void paintBorder(Graphics g) {
 		Graphics2D g2D = (Graphics2D) g;
 		borderColor = getForeground();
@@ -68,14 +68,23 @@ public class CountryComponent extends JButton{
 	    g2D.drawOval(0, 0, getSize().width - 1, getSize().height -1);
 	}
 
+	/**
+	 * Set the center location of the component.
+	 * @param location is the location of component.
+	 */
 	public void setLocationAtPoint(Point location) {
 		this.centerLocation.setLocation(location);
 		this.componentLocation.setLocation(location.x - Radius, location.y - Radius);
 		
 		this.setLocation(this.componentLocation);
 	}
-	// Hit detection.
+	
 
+	/**
+	 * Check whether a point is inside the component.
+	 * @param x is the x coordinate.
+	 * @param y is the y coordinate.
+	 */
 	public boolean contains(int x, int y) {
 		if (shape == null || !shape.getBounds().equals(getBounds())) {
 			shape = new Ellipse2D.Float(0, 0, getWidth(), getHeight());
@@ -84,6 +93,10 @@ public class CountryComponent extends JButton{
 		return shape.contains(x, y);
 	}
 
+	/**
+	 * Get the center location of the component instead of the real location of the component.
+	 * @return the center location of the component.
+	 */
 	public Point getCenterLocation() {
 		return centerLocation;
 	}

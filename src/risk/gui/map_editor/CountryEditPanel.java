@@ -8,12 +8,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 
-import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -23,13 +20,16 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.text.JTextComponent;
 
 import risk.contorller.MapEditorController;
 import risk.game.*;
-import risk.gui.component.CountryComponent;
 
-
+/**
+ * CountryEditPanal provides an instance of JPanel which is a sub-panel
+ * of the MapEditor panel. This panel contains several areas to show and edit
+ * information of a selected country including the name, continent and adjacent
+ * countries.
+ */
 public class CountryEditPanel extends JPanel {
 	public static final int HEIGHT = 500;
 	public static final int WIDTH = 200;
@@ -52,6 +52,9 @@ public class CountryEditPanel extends JPanel {
 	private LinkedList<Continent> continentList;
 	private ListenForComboBox listenForComboBox;
 	
+	/**
+	 * Constructor of this class. Initialize all class variables and create information area.
+	 */
 	public CountryEditPanel(MapEditorController controller) {
 		this.setOpaque(true);
 		this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
@@ -70,6 +73,10 @@ public class CountryEditPanel extends JPanel {
 
 	}
 	
+	/**
+	 * This method creates a panel which contains a text field enabling users to edit
+	 * the name of a selected country.
+	 */
 	private void createNameFieldPanel() {
 		this.add(Box.createRigidArea(new Dimension(WIDTH, SPACE_HEIGHT)));	
 		nameFieldPanel = new JPanel();
@@ -83,6 +90,11 @@ public class CountryEditPanel extends JPanel {
 		this.add(nameFieldPanel);		
 	}
 	
+	/**
+	 * This method creates a panel with a combo box and a button, which allow
+	 * users to select an existing continent from the combo box and create a new
+	 * continent by click the button.
+	 */
 	private void createContinentFieldPanel() {
 		this.add(Box.createRigidArea(new Dimension(WIDTH, SPACE_HEIGHT)));
 		
@@ -102,6 +114,10 @@ public class CountryEditPanel extends JPanel {
 		this.add(continentPanel);
 	}
 	
+	/**
+	 * This method creates a panel with a series of links which indicate adjacent countries
+	 * of a selected country.
+	 */
 	private void createLinksPanel() {
 		this.add(Box.createRigidArea(new Dimension(WIDTH, SPACE_HEIGHT)));
 		
@@ -112,6 +128,10 @@ public class CountryEditPanel extends JPanel {
 		this.add(linksPanel);	
 	}
 	
+	/**
+	 * This methods create a "Delete this country" button which allows users to delete
+	 * the selected country from the map.
+	 */
 	private void createDeleteCountryBtn() {
 		deleteCountryBtn = new JButton("Delete this country");
 		deleteCountryBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -119,6 +139,9 @@ public class CountryEditPanel extends JPanel {
 		this.add(deleteCountryBtn);
 	}
 	
+	/**
+	 * This method cleans up all information of the CountryEdit panel.
+	 */
 	public void clear() {
 		((JTextField) nameFieldPanel.getComponent(0)).setText("");
 		continentComboBox.removeAllItems();
@@ -127,6 +150,9 @@ public class CountryEditPanel extends JPanel {
 		this.revalidate();
 	}
 	
+	/**
+	 * Update the information of CountryEdit panel according to data stored in the controller.
+	 */
 	public void updateInfo() {
 		Component[] components = nameFieldPanel.getComponents();
 		if (this.selectedCountry != null) {
@@ -142,6 +168,9 @@ public class CountryEditPanel extends JPanel {
 		this.updateLinkPanel();
 	}
 	
+	/**
+	 * Update information of continent panel according to data stored in the controller.
+	 */
 	private void updateContinentPanel() {
 		continentComboBox.removeItemListener(listenForComboBox);
 		
@@ -163,6 +192,9 @@ public class CountryEditPanel extends JPanel {
 		continentComboBox.addItemListener(listenForComboBox);
 	}	
 	
+	/**
+	 * Update information of the link panel according to data stored in the controller.
+	 */
 	private void updateLinkPanel() {
 		this.linksPanel.removeAll();
 		selectedCountry = controller.getSelectedCountry();
@@ -181,8 +213,10 @@ public class CountryEditPanel extends JPanel {
 		this.linksPanel.repaint();
 	}
 	
-	/* methods related to continentPanel */
-	
+	/**
+	 * This method is called when the button in the continent panel is clicked.
+	 * Add a new continent and assign a name and a value to it.
+	 */
 	private void addContinent() {
 		String newContinentName;
 		String continentValueText;
@@ -235,8 +269,12 @@ public class CountryEditPanel extends JPanel {
 	}
 
 
-	/* methods related to linksPanel */
-	
+	/**
+	 * This method creates a panel with a button and a label, and add this panel in the link panel.
+	 * The button is used to delete the corresponding link of the selected country and the label shows
+	 * an adjacent country the link links to.
+	 * @param newCountryName is the name of an adjacent country.
+	 */
 	private void addLink(String newCountryName) {
 		JPanel linkContent = new JPanel();
 		linkContent.setPreferredSize(new Dimension(170,20));
@@ -255,6 +293,11 @@ public class CountryEditPanel extends JPanel {
 		linksPanel.add(linkContent);
 	}
 
+	/**
+	 * This function is called when a button of the link panel is clicked.
+	 * Remove the corresponding link of the selected panel.
+	 * @param selectedBtn is the button being clicked.
+	 */
 	private void removeLink(JButton selectedBtn) {
 		JPanel linkContent = (JPanel) selectedBtn.getParent();
 		String targetCountry = ((JLabel) linkContent.getComponent(1)).getText();
@@ -264,9 +307,15 @@ public class CountryEditPanel extends JPanel {
 		linksPanel.repaint();		
 	}	
 
-
+	/**
+	 * This class is an action listener for buttons.
+	 *
+	 */
 	private class ListenForButton implements ActionListener {
 		
+		/**
+		 * Listen to a button and react when the button is clicked.
+		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			JButton selectedBtn = (JButton) e.getSource();
@@ -283,8 +332,14 @@ public class CountryEditPanel extends JPanel {
 		}
 	}
 
+	/**
+	 * The item listener of the combo box.
+	 */
 	private class ListenForComboBox implements ItemListener {
 
+		/**
+		 * React when users select an item in the combo box.
+		 */
 		@Override
 		public void itemStateChanged(ItemEvent e) {
 			

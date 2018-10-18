@@ -2,12 +2,9 @@ package risk.game;
 
 import java.awt.Dimension;
 import java.awt.Point;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-
-import javax.naming.SizeLimitExceededException;
 
 public class RiskMap {
 

@@ -10,7 +10,9 @@ import javax.swing.JPanel;
 
 import risk.gui.map_editor.MapEditorPanel;
 
-
+/**
+ * This class provides an instance of JFrame which is the main frame of the program.
+ */
 public class MainFrame extends JFrame {
 	
 	public static final String MENU_PANEL = "MenuPanel";
@@ -23,12 +25,18 @@ public class MainFrame extends JFrame {
 		
 
 	
+	/**
+	 * Constructor
+	 */
 	private MainFrame() {
 		initFrame();
 	}
 	
+	/**
+	 * Initialize all class variables. Create MapEditor panel.
+	 */
 	private void initFrame() {
-		SetSize(MenuPanel.WIDTH, MenuPanel.HEIGHT);
+		setFrameSize(MenuPanel.WIDTH, MenuPanel.HEIGHT);
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setTitle("Risk");
@@ -49,7 +57,12 @@ public class MainFrame extends JFrame {
 
 	}
 	
-	public void SetSize(int x, int y) {
+	/**
+	 * Set the size and location of the frame.
+	 * @param x is the width of the frame.
+	 * @param y is the height of the frame.
+	 */
+	public void setFrameSize(int x, int y) {
 		setSize(x, y);
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		Dimension dim = tk.getScreenSize();
@@ -60,12 +73,20 @@ public class MainFrame extends JFrame {
 		setLocation(xPos, yPos);
 	}
 	
+	/**
+	 * Set the current displaying panel of the frame.
+	 * @param panelName is the name of panel to be shown.
+	 */
 	public void setCurrentPanel(String panelName) {
 		CardLayout c = (CardLayout)(panelManager.getLayout());
 		c.show(panelManager, panelName);
 
 	}
 	
+	/**
+	 * Get the instance of the frame.
+	 * @return the instance of the frame.
+	 */
 	public static MainFrame getInstance() {
 		if (mainFrame == null) {
 			mainFrame = new MainFrame();

@@ -15,13 +15,10 @@ import risk.game.RiskMap;
  * be correctly loaded into the map editor.
  */
 public class RiskMapIO {
-    private boolean bMapHead = false;
     private boolean bContinent = false;
     private boolean bterritories = false;
     private String label = "";
 
-    private LinkedHashMap<String, Continent> continentMap = new LinkedHashMap<>();
-    private LinkedHashMap<String, Country> countryMap = new LinkedHashMap<>();  
     private RiskMap map;
     private HashMap<String, Country> countryHashMap;
     private LinkedList<Continent> continentList;

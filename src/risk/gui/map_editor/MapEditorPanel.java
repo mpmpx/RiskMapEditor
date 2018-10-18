@@ -2,44 +2,23 @@ package risk.gui.map_editor;
 
 import risk.contorller.*;
 import risk.game.Country;
-import risk.gui.MainFrame;
-import risk.gui.MenuPanel;
-import risk.gui.component.CountryComponent;
-import risk.gui.utilities.ColorPool;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.event.MouseInputListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.filechooser.FileSystemView;
 
-
+/**
+ * MapEditorPanel is the class which provides an instance of JPanel. 
+ * It is the main panel of the map editor of the Risk game which is divided
+ * into three areas. CountryEdit panel shows information of the selected country
+ * and allows users for editing; MapDisplay panel displays all graphic information
+ * of the map. EditorMenu panel provides several buttons managing the map editor.
+ */
 public class MapEditorPanel extends JPanel {
 	public static final int HEIGHT = 800;
 	public static final int WIDTH = 1200;
@@ -50,6 +29,10 @@ public class MapEditorPanel extends JPanel {
 	
 	private MapEditorController controller;
 	
+	/**
+	 * Constructor of the class. Initialize all class variables and create
+	 * three sub-panels.
+	 */
 	public MapEditorPanel() {	
 	    this.setLayout(new GridBagLayout());
 	    GridBagConstraints c = new GridBagConstraints();
@@ -78,6 +61,11 @@ public class MapEditorPanel extends JPanel {
 	    this.add(editorMenuPanel, c);
 	}	
 	
+	/**
+	 * Set the size of MapDisplay panel and its scroll panel.
+	 * @param width is the width of the MapDisplay panel.
+	 * @param height is the height of the MapDisplay panel.
+	 */
 	public void setMapSize(int width, int height) {
 		this.mapDisplayPanel.setPreferredSize(new Dimension(width, height));
 		this.mapDisplayPanel.revalidate();
@@ -93,10 +81,19 @@ public class MapEditorPanel extends JPanel {
 		this.mapDisplayPanel.getScrollPane().revalidate();
 	}
 	
+	/**
+	 * Add and draw a new country on the display panel.
+	 * @param country is the country to be added.
+	 */
 	public void addCountry(Country country) {
 		mapDisplayPanel.addCountry(country);
 	}
 	
+	/**
+	 * Recursively enable or disable all components of the given container.
+	 * @param container is the container to be handled.
+	 * @param enable is the signal determines whether to enable or disable.
+	 */
 	private void enableAllComponent(Container container, boolean enable) {
 		Component[] componentList = container.getComponents();
 		for (Component component : componentList) {
@@ -108,41 +105,58 @@ public class MapEditorPanel extends JPanel {
 		container.setEnabled(enable);
 	}
 	
+	/**
+	 * Recursively enable or disable all components of the MapDisplay panel.
+	 * @param enable is the signal determines whether to enable or disable.
+	 */
 	public void enableMapDisplayPanel(boolean enable) {
 		enableAllComponent(mapDisplayPanel.getScrollPane(), enable);
 	}
 	
+	/**
+	 * Recursively enable or disable all components of the CountryEdit panel.
+	 * @param enable is the signal determines whether to enable or disable.
+	 */
 	public void enableCountryEditPanel(boolean enable) {
 		enableAllComponent(countryEditPanel, enable);
 	}
 	
-	
+	/**
+	 * Update all information of the CountryEdit panel.
+	 */
 	public void updateEditPanel() {
 		countryEditPanel.updateInfo();
 	}
 	
+	/**
+	 * Repaint and update all information of the MapDisplay panel.
+	 */
 	public void updateMapDisplay() {
 		mapDisplayPanel.repaint();
 		mapDisplayPanel.updateInfo();
 		
 	}
 	
+	/**
+	 * Remove a country on the display panel according to given location.
+	 * @param location is the location of the country to be removed.
+	 */
 	public void removeCountry(Point location) {
 		mapDisplayPanel.removeCountry(location);
 	}
 	
+	/**
+	 * Clean up all information of mapDisplay panel and CountryEdit panel.
+	 */
 	public void clear() {
 		mapDisplayPanel.clear();
 		countryEditPanel.clear();
 	}
 	
+	/**
+	 * Clean up all information of countryEdit panel.
+	 */
 	public void clearEditPanel() {
 		countryEditPanel.clear();
 	}
 }
-
-
-
-
-
-
