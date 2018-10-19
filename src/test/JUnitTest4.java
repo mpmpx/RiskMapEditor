@@ -15,7 +15,6 @@ import risk.io.RiskMapIO;
 public class JUnitTest4 {
 
 	RiskMapIO riskMapIO = new RiskMapIO();
-	File file = new File("Africa_miss_continent.map");
 	
 	@BeforeClass
 	public static void beforeTest() {
@@ -55,16 +54,6 @@ public class JUnitTest4 {
 		}
 	}
 	
-	@Test
-	public void testRead4() {
-		try {
-			riskMapIO.readFile("src/test/Africa_non_connected_graph.map");
-		}
-		catch (Exception e) {
-			assertEquals("The map contained in the file is not a connected graph.", e.getMessage());
-			System.out.println("Successfully test missing connection in \"Africa_non_connected_graph.map\" - " +e.getMessage());
-		}
-	}
 	
 	@AfterClass
 	public static void afterTest() {
