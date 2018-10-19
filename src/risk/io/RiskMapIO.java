@@ -16,13 +16,10 @@ import risk.game.RiskMap;
  *
  */
 public class RiskMapIO {
-    private boolean bMapHead = false;
     private boolean bContinent = false;
     private boolean bterritories = false;
     private String label = "";
 
-    private LinkedHashMap<String, Continent> continentMap = new LinkedHashMap<>();
-    private LinkedHashMap<String, Country> countryMap = new LinkedHashMap<>();  
     private RiskMap map;
     private HashMap<String, Country> countryHashMap;
     private LinkedList<Continent> continentList;
@@ -60,6 +57,11 @@ public class RiskMapIO {
      */
     private void validateContinent() throws IOException {
     	boolean found = false;
+    	
+    	if (continentList.size() > RiskMap.MAX_CONTINENT) {
+    		throw new IOException("Number of the continents exceeds the Maximum " + RiskMap.MAX_CONTINENT + ".");
+    	}
+    	
     	for (Continent continent : continentList) {
     		if (continent.getValue() == 0) {
     			throw new IOException("Continent " + continent.getName() + " has value 0");
@@ -86,6 +88,10 @@ public class RiskMapIO {
      * country does not links to itself.
      */
     private void validateCountry() throws IOException {
+    	if (countryHashMap.size() > RiskMap.MAX_COUNTRY) {
+			throw new IOException("Number of countries exceeds the Maximum: " + RiskMap.MAX_COUNTRY + ".");
+    	}
+    	
     	for (Country country : countryHashMap.values()) {
     		if (edgeHashMap.get(country.getName()).size() > Country.MAX_ADJACENT_COUNTRIES) {
     			throw new IOException(country.getName() + " has more than 10 adjacent countries.");
@@ -93,12 +99,52 @@ public class RiskMapIO {
     		for (String adjacent : edgeHashMap.get(country.getName())) {
     			if (countryHashMap.containsKey(adjacent) && edgeHashMap.containsKey(adjacent)) {
     				if (!edgeHashMap.get(adjacent).contains(country.getName())) {
-    					throw new IOException(country.getName() + " and " + adjacent + "do not link to each other.");
+    					throw new IOException(country.getName() + " and " + adjacent + " do not link to each other.");
     				}
     			}
     			else {
     				throw new IOException("Adjacent country of " + country.getName() + ": " + adjacent + " is invalid.");
     			}
+    		}
+    	}
+    }
+    
+    /**
+     * Check whether the map read from the file is a connected graph.
+     * @throws IOException if the the map read from the file is not a connected graph.
+     */
+    private void validateConnectedGraph() throws IOException {
+    	String firstCountry = null;
+    	for (String name : countryHashMap.keySet()) {
+    		firstCountry = name;
+    		break;
+    	}
+    	
+    	HashMap<String, Boolean> visited = new HashMap<String, Boolean>();
+    	for (Country country : countryHashMap.values()) {
+    		visited.put(country.getName(), false);
+    	}
+  
+    	this.depthFirstSearch(firstCountry, visited);
+    	
+    	for (Boolean status : visited.values()) {
+    		if (status == false) {
+				throw new IOException("The map contained in the file is not a connected graph.");
+    		}
+    	}
+    }
+    
+    /**
+     * Implementation of the DFS.
+     * @param countryName is the current name the country.
+     * @param visited is the hash map records whether a country has been reached.
+     */
+    private void depthFirstSearch(String countryName, HashMap<String, Boolean> visited ) {
+    	visited.put(countryName, true);
+    	
+    	for (String adjacentCountry : edgeHashMap.get(countryName)) {
+    		if (visited.get(adjacentCountry) == false) {
+    			depthFirstSearch(adjacentCountry, visited);
     		}
     	}
     }
@@ -165,9 +211,9 @@ public class RiskMapIO {
         });
         bufferedReader.close();
         this.validateBlockName();
-        this.validateBlockName();
         this.validateContinent();
         this.validateCountry();
+        this.validateConnectedGraph();
         
         map.setSize(mapWidth + 100, mapHeight + 100);
         for (Continent continent : continentList) {

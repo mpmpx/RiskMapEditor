@@ -131,6 +131,9 @@ class MapDisplayPanel extends JPanel implements MouseInputListener {
 				if (country.getContinentName() != null) {
 					((CountryComponent)btn).setForeground(continentColor);					
 					((CountryComponent)btn).setBackground(continentColor);
+				} else {
+					((CountryComponent)btn).setForeground(new Color(123,123,123));					
+					((CountryComponent)btn).setBackground(new Color(123,123,123));
 				}
 				btn.revalidate();
 				btn.repaint();

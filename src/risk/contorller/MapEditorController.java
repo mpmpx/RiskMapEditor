@@ -134,7 +134,7 @@ public class MapEditorController {
 		
 		for (Continent continent : continentList) {
 			currentMap.addContinent(continent);
-		}
+		}		
 		
 		try {
 			for (Country country : countryHashMap.values()) {
@@ -150,6 +150,20 @@ public class MapEditorController {
 					country.addAdjacentCountry(location);
 				}
 				currentMap.addCountry(country);
+				
+				Point firstLocation = null;
+				HashMap<Point, Boolean> visited = new HashMap<Point, Boolean>();
+				for (Point location : edgeHashMap.keySet()) {
+					visited.put(location, false);
+					firstLocation = location;
+				}
+				this.depthFirstSearch(firstLocation, visited);
+				
+				for (Boolean status : visited.values()) {
+					if (status == false) {
+						throw new Exception("The map is not a connected graph.");
+					}
+				}
 			}
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(this.mapEditorPanel, e.getMessage(), "error", JOptionPane.ERROR_MESSAGE);	
@@ -169,6 +183,21 @@ public class MapEditorController {
 		currentMap = new RiskMap();
 		riskMapIO = new RiskMapIO();
 	}
+	
+	/**
+	 * Implementation of DFS
+	 * @param location is the current location.
+	 * @param visited is a hash map records whether a country is reached.
+	 */
+    private void depthFirstSearch(Point location, HashMap<Point, Boolean> visited ) {
+    	visited.put(location, true);
+    	
+    	for (Point adjacentCountry : edgeHashMap.get(location)) {
+    		if (visited.get(adjacentCountry) == false) {
+    			depthFirstSearch(adjacentCountry, visited);
+    		}
+    	}
+    }
 	
 	/**
 	 * Get the status of whether the map has already been saved.
@@ -369,6 +398,30 @@ public class MapEditorController {
 		continentList.add(new Continent(continentName, continentValue));
 		continentColorHashMap.put(continentName, colorPool.get());
 		isSaved = false;
+	}
+	
+	public void deleteContinent(String continentName) {
+		for (Continent continent : continentList) {
+			if (continent.getName().equals(continentName)) {
+				continentList.remove(continent);
+				Color color = continentColorHashMap.get(continent.getName());
+				continentColorHashMap.remove(continent.getName());
+				colorPool.put(color);
+				
+				for (Country country : countryHashMap.values()) {
+					if (country.getContinentName() != null) {
+						if (country.getContinentName().equals(continent.getName())) {
+							country.setContinentName(null);
+						}
+					}
+				}
+				
+				break;
+			}
+		}
+		isSaved = false;
+		this.mapEditorPanel.updateMapDisplay();
+		this.mapEditorPanel.updateEditPanel();
 	}
 	
 	/**
