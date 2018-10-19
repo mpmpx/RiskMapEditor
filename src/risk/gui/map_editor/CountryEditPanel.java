@@ -270,9 +270,10 @@ public class CountryEditPanel extends JPanel {
 		}		
 	}
 
-	private void deleteContinent() {
-		System.out.println(this.continentComboBox.getSelectedItem());
-		
+	/**
+	 * Delete the continent in the combo box by clicking the button.
+	 */
+	private void deleteContinent() {		
 		if (this.continentComboBox.getSelectedItem() != null) {
 			controller.deleteContinent((String)this.continentComboBox.getSelectedItem());
 			this.updateContinentPanel();

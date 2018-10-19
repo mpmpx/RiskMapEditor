@@ -400,6 +400,10 @@ public class MapEditorController {
 		isSaved = false;
 	}
 	
+	/**
+	 * Delete a continent according to the given continent name.
+	 * @param continentName is the given continent name to be deleted.
+	 */
 	public void deleteContinent(String continentName) {
 		for (Continent continent : continentList) {
 			if (continent.getName().equals(continentName)) {
