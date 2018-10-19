@@ -38,5 +38,6 @@ public class JUnitTest1 {
 	@AfterClass
 	public static void afterTest() {
 		System.out.println("Finish testing Continent.");
+		System.out.println();
 	}
 }

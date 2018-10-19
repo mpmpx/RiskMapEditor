@@ -43,6 +43,7 @@ public class CountryEditPanel extends JPanel {
 	private JPanel continentPanel;
 	private JPanel linksPanel;
 	private JButton addContinentBtn;
+	private JButton deleteContinentBtn;
 	private JButton deleteCountryBtn;
 	private JComboBox<String> continentComboBox;
 	private MapEditorController controller;
@@ -103,7 +104,7 @@ public class CountryEditPanel extends JPanel {
 		continentPanel.setBorder(BorderFactory.createTitledBorder("Continent"));
 		continentComboBox = new JComboBox<>();
 		continentComboBox.addItemListener(listenForComboBox);
-		continentComboBox.setPreferredSize(new Dimension(130,20));
+		continentComboBox.setPreferredSize(new Dimension(120,20));
 		continentPanel.add(continentComboBox);
 		
 		addContinentBtn = new JButton("+");
@@ -111,6 +112,13 @@ public class CountryEditPanel extends JPanel {
 		addContinentBtn.setPreferredSize(new Dimension(20, 20));
 		addContinentBtn.addActionListener(new ListenForButton());
 		continentPanel.add(addContinentBtn);
+		
+		deleteContinentBtn = new JButton("-");
+		deleteContinentBtn.setBorder(null);
+		deleteContinentBtn.setPreferredSize(new Dimension(20, 20));
+		deleteContinentBtn.addActionListener(new ListenForButton());
+		continentPanel.add(deleteContinentBtn);
+
 		this.add(continentPanel);
 	}
 	
@@ -176,16 +184,12 @@ public class CountryEditPanel extends JPanel {
 		
 		continentList = controller.getContinentList();
 		continentComboBox.getItemCount();
-		LinkedList<String> comboBoxContent = new LinkedList<String>();
-		for (int i = 0; i < continentComboBox.getItemCount(); i++) {
-			comboBoxContent.add(continentComboBox.getItemAt(i));
-		}
-		for (Continent continent : continentList) {
-			if (!comboBoxContent.contains(continent.getName())) {
-				continentComboBox.addItem(continent.getName());
-			}
-		}
+		continentComboBox.removeAllItems();
 		
+		for (Continent continent : continentList) {
+			continentComboBox.addItem(continent.getName());
+		}
+		continentComboBox.setSelectedIndex(-1);
 		continentComboBox.setSelectedItem(this.selectedCountry.getContinentName());
 		continentPanel.revalidate();
 		continentPanel.repaint();
@@ -262,12 +266,20 @@ public class CountryEditPanel extends JPanel {
 			
 			controller.addContinent(newContinentName, newContinentValue);
 			this.updateContinentPanel();
-			//this.continentComboBox.addItem(newContinentName);
-			//this.continentComboBox.getModel().setSelectedItem(null);
 			break;
 		}		
 	}
 
+	private void deleteContinent() {
+		System.out.println(this.continentComboBox.getSelectedItem());
+		
+		if (this.continentComboBox.getSelectedItem() != null) {
+			controller.deleteContinent((String)this.continentComboBox.getSelectedItem());
+			this.updateContinentPanel();
+		}
+	}
+
+	
 
 	/**
 	 * This method creates a panel with a button and a label, and add this panel in the link panel.
@@ -321,6 +333,9 @@ public class CountryEditPanel extends JPanel {
 			JButton selectedBtn = (JButton) e.getSource();
 			if (selectedBtn == addContinentBtn) {
 				addContinent();
+			}
+			else if (selectedBtn == deleteContinentBtn) {
+				deleteContinent();
 			}
 			else if (selectedBtn == deleteCountryBtn){
 				controller.deleteCountry(controller.getSelectedCountry());

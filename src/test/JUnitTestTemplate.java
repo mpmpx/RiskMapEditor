@@ -9,24 +9,28 @@ import org.junit.Test;
 
 public class JUnitTestTemplate {
 
+	public static void printMsg(String msg) {
+		System.out.println(msg);
+	}
+	
 	@BeforeClass
 	public static void beforeTest() {
-		System.out.println("");
+		printMsg("Start to test.");
 	}
 	
 	@Test
 	public void test1() {
-		System.out.println("");
+		printMsg("");
 	}
 	
 	@Test
 	public void test2() {
-		System.out.println("");
+		printMsg("");
 	}
 	
 	@AfterClass
 	public static void afterTest() {
-		System.out.println("");
-		System.out.println();
+		printMsg("Finish testing.");
+		printMsg("");
 	}
 }

@@ -2,62 +2,63 @@ package test;
 
 import static org.junit.Assert.*;
 
-import java.io.File;
-import java.nio.file.Paths;
+import java.awt.Point;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import risk.io.RiskMapIO;
+import risk.game.Country;
 
 
 public class JUnitTest2 {
 
-	RiskMapIO riskMapIO = new RiskMapIO();
-	File file = new File("Africa_miss_continent.map");
+	private Country country = new Country();
+	private String testName = "China";
+	private Point testLocation = new Point(200, 300);
+	private String testContinent = "Asia";
+	private Point testAdjacentCountry = new Point(100, 300);
+	
+	public static void printMsg(String msg) {
+		System.out.println(msg);
+	}
 	
 	@BeforeClass
 	public static void beforeTest() {
-		System.out.println("Start to test reading a invalid file with three types of error.");
+		printMsg("Start to test Country.");
 	}
 	
 	@Test
-	public void testRead1() {
-		try {
-			riskMapIO.readFile("src/test/Africa_miss_continent.map");
-		}
-		catch (Exception e) {
-			assertEquals("Continent of Angola: The Congo is invalid.", e.getMessage());
-			System.out.println("Successfully test missing continent in .msp file - " +e.getMessage());
-		}	
+	public void testName() {
+		country.setName(testName);
+		assertEquals(testName, country.getName());
+		printMsg("Successfully set the name to the country with " + testName + ".");
 	}
 	
 	@Test
-	public void testRead2() {
-		try {
-			riskMapIO.readFile("src/test/Africa_miss_country.map");
-		}
-		catch (Exception e) {
-			assertEquals("Adjacent country of Algeria: Morocco is invalid.", e.getMessage());
-			System.out.println("Successfully test missing country in .msp file - " +e.getMessage());
-		}
+	public void testLocation() {
+		country.setLocation(testLocation);
+		assertEquals(testLocation, country.getLocation());
+		printMsg("Successfully set the location to the country with (" + testLocation.x + ", " + testLocation.y + ").");
 	}
 	
 	@Test
-	public void testRead3() {
-		try {
-			riskMapIO.readFile("src/test/Africa_miss_connect.map");
-		}
-		catch (Exception e) {
-			assertEquals("Libya and Egypt do not link to each other.", e.getMessage());
-			System.out.println("Successfully test missing connection in .msp file - " +e.getMessage());
-		}
+	public void testContinent() {
+		country.setContinentName(testContinent);
+		assertEquals(testContinent, country.getContinentName());
+		printMsg("Succesfully set the continent to the country with " + testContinent + ".");
+	}
+	
+	@Test
+	public void testAdjacentCountry() {
+		country.addAdjacentCountry(testAdjacentCountry);
+		assertEquals(testAdjacentCountry, country.getAdjacentCountryList().getFirst());
+		printMsg("Successfully added a country as an adjacent country of the country.");
 	}
 	
 	@AfterClass
 	public static void afterTest() {
-		System.out.println("");
-		System.out.println();
+		printMsg("Finish testing Country.");
+		printMsg("");
 	}
 }
