@@ -16,13 +16,10 @@ import risk.game.RiskMap;
  *
  */
 public class RiskMapIO {
-    private boolean bMapHead = false;
     private boolean bContinent = false;
     private boolean bterritories = false;
     private String label = "";
 
-    private LinkedHashMap<String, Continent> continentMap = new LinkedHashMap<>();
-    private LinkedHashMap<String, Country> countryMap = new LinkedHashMap<>();  
     private RiskMap map;
     private HashMap<String, Country> countryHashMap;
     private LinkedList<Continent> continentList;
@@ -93,7 +90,7 @@ public class RiskMapIO {
     		for (String adjacent : edgeHashMap.get(country.getName())) {
     			if (countryHashMap.containsKey(adjacent) && edgeHashMap.containsKey(adjacent)) {
     				if (!edgeHashMap.get(adjacent).contains(country.getName())) {
-    					throw new IOException(country.getName() + " and " + adjacent + "do not link to each other.");
+    					throw new IOException(country.getName() + " and " + adjacent + " do not link to each other.");
     				}
     			}
     			else {
@@ -164,7 +161,6 @@ public class RiskMapIO {
 
         });
         bufferedReader.close();
-        this.validateBlockName();
         this.validateBlockName();
         this.validateContinent();
         this.validateCountry();

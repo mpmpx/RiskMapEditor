@@ -18,7 +18,7 @@ public class JUnitTest1 {
 	
 	@BeforeClass
 	public static void beforeTest() {
-		System.out.println("Start to test Continent");
+		System.out.println("Start to test Continent.");
 	}
 	
 	@Test
@@ -37,7 +37,6 @@ public class JUnitTest1 {
 	
 	@AfterClass
 	public static void afterTest() {
-		System.out.println("Finish testing Continent");
-		System.out.println();
+		System.out.println("Finish testing Continent.");
 	}
 }
