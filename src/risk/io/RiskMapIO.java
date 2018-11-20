@@ -81,7 +81,54 @@ public class RiskMapIO {
     		}
     	}
     }
+    
+    private void validateConnectedContinent() throws IOException {
+    	HashMap<String, HashMap<String, Country>> tmpContinentMap = new HashMap<String, HashMap<String, Country>>();
 
+    	for (Continent continent : continentList) {
+    		tmpContinentMap.put(continent.getName(), new HashMap<String, Country>());
+    	}
+    	
+    	for (Country territory : countryHashMap.values()) {
+    		tmpContinentMap.get(territory.getContinentName()).put(territory.getName(), territory);
+    	}
+    	
+    	for (String continentName : tmpContinentMap.keySet()) {
+    		HashMap<String, Country> tmpTerritoryMap = tmpContinentMap.get(continentName);
+        	String firstTerritory = null;
+        	for (String name : tmpTerritoryMap.keySet()) {
+        		firstTerritory = name;
+        		break;
+        	}
+        	
+        	HashMap<String, Boolean> visited = new HashMap<String, Boolean>();
+        	for (Country territory : tmpTerritoryMap.values()) {
+        		visited.put(territory.getName(), false);
+        	}
+      
+        	Stack<String> stack = new Stack<String>();
+        	stack.push(firstTerritory);
+        	
+        	while (!stack.isEmpty()) {
+        		String currentTerritory = stack.pop();
+        		if (visited.containsKey(currentTerritory)) {	
+        			if (visited.get(currentTerritory) == false) {
+        				visited.replace(currentTerritory, true);
+        				for (String adjacentTerritory : edgeHashMap.get(currentTerritory)) {
+        					stack.push(adjacentTerritory);
+        				}
+        			}
+        		}
+        	}
+        	    	
+        	for (Boolean status : visited.values()) {
+        		if (status == false) {
+    				throw new IOException(continentName + " is not a connected subgraph");
+        		}
+        	}
+    	}
+    }
+    
     /**
      * Method to validate every country and their adjacent countries.
      * @throws IOException if a country's adjacent country is not valid or a country's adjacent
@@ -213,6 +260,7 @@ public class RiskMapIO {
         this.validateBlockName();
         this.validateContinent();
         this.validateCountry();
+        this.validateConnectedContinent();
         this.validateConnectedGraph();
         
         map.setSize(mapWidth + 100, mapHeight + 100);
