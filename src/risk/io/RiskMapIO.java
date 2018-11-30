@@ -82,6 +82,10 @@ public class RiskMapIO {
     	}
     }
     
+    /**
+     * Method to check whether all continents are connected graphs.
+     * @throws IOException if a continent is not a connected graph.
+     */
     private void validateConnectedContinent() throws IOException {
     	HashMap<String, HashMap<String, Country>> tmpContinentMap = new HashMap<String, HashMap<String, Country>>();
 
@@ -144,12 +148,7 @@ public class RiskMapIO {
     			throw new IOException(country.getName() + " has more than 10 adjacent countries.");
     		}
     		for (String adjacent : edgeHashMap.get(country.getName())) {
-    			if (countryHashMap.containsKey(adjacent) && edgeHashMap.containsKey(adjacent)) {
-    				if (!edgeHashMap.get(adjacent).contains(country.getName())) {
-    					throw new IOException(country.getName() + " and " + adjacent + " do not link to each other.");
-    				}
-    			}
-    			else {
+    			if (!countryHashMap.containsKey(adjacent) || !edgeHashMap.containsKey(adjacent)) {
     				throw new IOException("Adjacent country of " + country.getName() + ": " + adjacent + " is invalid.");
     			}
     		}
